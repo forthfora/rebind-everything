@@ -10,7 +10,7 @@ using System.Security;
 #pragma warning restore CS0618 // Type or member is obsolete
 
 
-namespace RebindSpearmaster
+namespace RebindEverything
 {
     [BepInPlugin(AUTHOR + "." + MOD_ID, MOD_NAME, VERSION)]
     internal class Plugin : BaseUnityPlugin

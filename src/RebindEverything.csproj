@@ -20,6 +20,9 @@
       <HintPath>..\..\Backups\Rain World\Rain World References\BepInEx\plugins\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ImprovedInput">
+      <HintPath>..\..\Backups\Rain World\Rain World References\ImprovedInput.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\..\Backups\Rain World\Rain World References\RainWorld_Data\Managed\Mono.Cecil.dll</HintPath>
     </Reference>
@@ -46,7 +49,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Rain World Modded\RainWorld_Data\StreamingAssets\mods\rebindspearmaster\plugins&quot;" />
+    <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Rain World Modded\RainWorld_Data\StreamingAssets\mods\rebindeverything\plugins&quot;" />
   </Target>
 
   <ItemGroup>
