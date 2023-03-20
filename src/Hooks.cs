@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using static MonoMod.InlineRT.MonoModRule;
+using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using Random = UnityEngine.Random;
 
 namespace RebindEverything
@@ -27,7 +28,7 @@ namespace RebindEverything
             try
             {
                 IL.Player.GrabUpdate += Player_GrabUpdateIL;
-                IL.Player.ClassMechanicsArtificer += Player_ClassMechanicsArtificer;
+                IL.Player.ClassMechanicsArtificer += Player_ClassMechanicsArtificerIL;
 
                 if (ModManager.MSC)
                 {
@@ -51,6 +52,16 @@ namespace RebindEverything
         {
             On.RainWorld.OnModsInit += RainWorld_OnModsInit;
             On.Player.ctor += Player_ctor;
+
+            On.Player.checkInput += Player_checkInput;
+        }
+
+        private static void Player_checkInput(On.Player.orig_checkInput orig, Player self)
+        {
+            orig(self);
+
+            if (CanArtiJump(self))
+                self.input[0].jmp = true;
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -73,18 +84,25 @@ namespace RebindEverything
         private static PlayerKeybind Ascension = null!;
 
         // Arti Jump & Parry
-        private static void Player_ClassMechanicsArtificer(ILContext il)
+        private static void Player_ClassMechanicsArtificerIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
 
             #region Arti Jump
             ILLabel afterJumpInput = null!;
+            ILLabel afterJump = null!;
 
+            // Get after jump input checks
             c.GotoNext(MoveType.Before,
                 x => x.MatchLdfld<Player>("bodyMode"),
                 x => x.MatchLdsfld<Player.BodyModeIndex>("ZeroG"),
                 x => x.Match(OpCodes.Call),
                 x => x.MatchBrtrue(out afterJumpInput));
+
+            // Get after jump block
+            c.GotoNext(MoveType.Before,
+                x => x.MatchLdcR4(0.1f),
+                x => x.MatchBgtUn(out afterJump));
 
             c.GotoPrev(MoveType.Before,
                 x => x.MatchLdloc(0),
@@ -92,22 +110,28 @@ namespace RebindEverything
                 x => x.MatchLdarg(0),
                 x => x.MatchLdfld<Player>("pyroJumpped"));
 
+
             c.Index++;
             c.Emit(OpCodes.Pop);
+            Plugin.Logger.LogWarning(c.Index);
             c.Emit(OpCodes.Ldarg_0);
 
-            c.EmitDelegate<Func<Player, bool>>((player) =>
-            {
-                if (ArtiJump == null || ArtiJump.CurrentBinding(player.playerState.playerNumber) == KeyCode.None) return false;
-             
-                bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
-                return player.IsPressed(ArtiJump) && !player.pyroJumpped && player.canJump <= 0 && !flag2;
-            });
+            c.EmitDelegate<Func<Player, bool>>((player) => CanArtiJump(player));
 
+            // Custom check branch
             c.Emit(OpCodes.Brtrue, afterJumpInput);
+
+            // Branch after if check returns false
+            c.Emit(OpCodes.Br, afterJump);
             c.Emit(OpCodes.Ldloc, 0);
 
+            Plugin.Logger.LogWarning(c.Context);
 
+            #endregion
+
+            return;
+
+            #region Arti Parry
             ILLabel afterParryInput = null!;
 
             c.GotoNext(MoveType.Before,
@@ -135,10 +159,38 @@ namespace RebindEverything
 
             c.Emit(OpCodes.Brtrue, afterParryInput);
             c.Emit(OpCodes.Ldloc, 0);
-
             #endregion
         }
-        
+
+        // Copied over default conditions
+        private static bool CanArtiJump(Player player)
+        {
+            bool isCustomInput = ArtiJump != null && ArtiJump.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            
+            bool flag = player.wantToJump > 0 && player.input[0].pckp;
+            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;    
+
+            if (isCustomInput && player.controller == null)
+                return player.JustPressed(ArtiJump) && !player.pyroJumpped && player.canJump <= 0 && !flag2;
+
+            return flag && !player.pyroJumpped && player.canJump <= 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 && (player.bodyMode == global::Player.BodyModeIndex.ZeroG || player.gravity <= 0.1f)));
+        }
+
+        private static bool CanArtiParry(Player player)
+        {
+            bool isCustomInput = ArtiParry != null && ArtiParry.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            bool flag = player.wantToJump > 0 && player.input[0].pckp;
+            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
+
+            if (isCustomInput && player.controller == null)
+            {
+                return player.IsPressed(ArtiParry) && !player.submerged && !flag2 && player.canJump > 0;
+            }
+
+            return flag && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == global::Player.BodyModeIndex.Crawl) && (player.canJump > 0 || player.input[0].y < 0);
+        }
+
         // Spear Extraction
         private static void Player_GrabUpdateIL(ILContext il)
         {
@@ -176,7 +228,7 @@ namespace RebindEverything
                 PlayerData.TryGetValue(player, out var playerEx);
                 if (playerEx == null) return false;
 
-                if (ExtractSpear == null || ExtractSpear.CurrentBinding(player.playerState.playerNumber) == KeyCode.None) return player.input[0].pckp;
+                if (ExtractSpear == null || ExtractSpear.CurrentBinding(player.playerState.playerNumber) == KeyCode.None || player.controller != null) return player.input[0].pckp;
 
                 return player.IsPressed(ExtractSpear);
             });
@@ -212,7 +264,7 @@ namespace RebindEverything
 
                 playerEx.wasExtractSpearInputRegistered = true;
 
-                if (ExtractSpear == null || ExtractSpear.CurrentBinding(player.playerState.playerNumber) == KeyCode.None) return player.input[0].pckp;
+                if (ExtractSpear == null || ExtractSpear.CurrentBinding(player.playerState.playerNumber) == KeyCode.None || player.controller != null) return player.input[0].pckp;
 
                 return player.IsPressed(ExtractSpear);
             });
@@ -244,6 +296,39 @@ namespace RebindEverything
             c.Emit(OpCodes.Brfalse, extractionDest);
             c.Emit(OpCodes.Ldloc_S, (byte)6);
             #endregion
+        }
+
+        private static bool CanBackSpear(Player player)
+        {
+            bool isCustomInput = BackSpear != null && BackSpear.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            if (isCustomInput && player.controller == null)
+                return player.IsPressed(BackSpear);
+
+            return player.input[0].pckp;
+        }
+
+        private static bool CanCraft(Player player)
+        {
+            bool isCustomInput = Craft != null && Craft.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            if (isCustomInput && player.controller == null)
+                return player.IsPressed(Craft);
+
+            return player.input[0].pckp;
+        }
+
+        private static bool CanAscension(Player player, bool isActivating)
+        {
+            bool isCustomInput = Ascension != null && Ascension.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            if (isCustomInput && player.controller == null)
+                return player.IsPressed(Ascension);
+
+            if (isActivating)
+                return player.wantToJump > 0 && player.input[0].jmp;
+
+            return player.wantToJump > 0;
         }
     }
 }
