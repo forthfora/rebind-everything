@@ -67,6 +67,8 @@ namespace RebindEverything
         private static ConditionalWeakTable<Player, PlayerEx> PlayerData = new ConditionalWeakTable<Player, PlayerEx>();
 
         private static readonly PlayerKeybind BackSpear = PlayerKeybind.Register("rebindeverything:backspear", "Rebind Everything", "Back Spear", KeyCode.None, KeyCode.None);
+        private static readonly PlayerKeybind BackSlugpup = PlayerKeybind.Register("rebindeverything:backslugpup", "Rebind Everything", "Back Slugpup", KeyCode.None, KeyCode.None);
+
         private static PlayerKeybind Craft = null!;
 
         private static PlayerKeybind ArtiJump = null!;
@@ -110,6 +112,16 @@ namespace RebindEverything
 
             if (isCustomInput && player.controller == null)
                 return player.IsPressed(BackSpear);
+
+            return player.input[0].pckp;
+        }
+
+        private static bool CanBackSlugpup(Player player)
+        {
+            bool isCustomInput = BackSlugpup != null && BackSlugpup.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            if (isCustomInput && player.controller == null)
+                return player.IsPressed(BackSlugpup);
 
             return player.input[0].pckp;
         }
@@ -181,7 +193,6 @@ namespace RebindEverything
 
             c.Index++;
             c.Emit(OpCodes.Pop);
-            Plugin.Logger.LogWarning(c.Index);
             c.Emit(OpCodes.Ldarg_0);
 
             c.EmitDelegate<Func<Player, bool>>((player) => CanArtiJump(player));
@@ -206,8 +217,6 @@ namespace RebindEverything
                 x => x.MatchLdcI4(0),
                 x => x.MatchBgt(out afterParryInput));
 
-            Plugin.Logger.LogWarning(c.Index);
-
             c.GotoPrev(MoveType.Before,
                 x => x.MatchLdloc(0),
                 x => x.MatchBrfalse(out afterParry),
@@ -231,6 +240,82 @@ namespace RebindEverything
         private static void Player_GrabUpdateIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
+
+            #region Back Spear and Slugpup
+
+            c.GotoNext(MoveType.Before,
+                x => x.MatchCallOrCallvirt<Player>("PickupPressed"),
+                x => x.MatchLdarg(0));
+
+            c.Index += 2;
+            c.Emit(OpCodes.Pop);
+
+            c.Emit(OpCodes.Ldloc, 7);
+            c.Emit(OpCodes.Ldarg_0);
+
+            c.EmitDelegate<Action<int, Player>>((num, player) =>
+            {
+                if (num > -1 || player.CanRetrieveSlugFromBack)
+                    player.slugOnBack.increment = CanBackSpear(player);
+            });
+
+            c.Emit(OpCodes.Ldloc, 5);
+            c.Emit(OpCodes.Ldarg_0);
+
+            c.EmitDelegate<Action<int, Player>>((num, player) =>
+            {
+                if (num > -1 || player.CanRetrieveSpearFromBack)
+                    player.spearOnBack.increment = CanBackSlugpup(player);
+            });
+
+            c.Emit(OpCodes.Ldarg_0);
+
+
+
+            ILLabel afterSlugpupsToBack = null!;
+
+            c.GotoNext(MoveType.After,
+                x => x.MatchCallOrCallvirt<Player>("get_CanRetrieveSlugFromBack"),
+                x => x.MatchBrfalse(out afterSlugpupsToBack));
+
+            c.GotoPrev(MoveType.Before,
+                x => x.MatchLdloc(7),
+                x => x.MatchLdcI4(-1),
+                x => x.MatchBgt(out _));
+
+            c.Index++;
+            c.Emit(OpCodes.Pop);
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<Player, bool>>((player) => BackSlugpup != null && BackSlugpup.CurrentBinding(player.playerState.playerNumber) != KeyCode.None);
+            c.Emit(OpCodes.Brtrue, afterSlugpupsToBack);
+
+            c.Emit(OpCodes.Ldloc_S, (byte)7);
+
+
+            ILLabel afterSpearToBack = null!;
+
+            c.GotoNext(MoveType.After,
+                x => x.MatchCallOrCallvirt<Player>("get_CanRetrieveSpearFromBack"),
+                x => x.MatchBrfalse(out afterSpearToBack));
+
+            c.GotoPrev(MoveType.Before,
+                x => x.MatchLdloc(5),
+                x => x.MatchLdcI4(-1),
+                x => x.MatchBgt(out _));
+
+            c.Index++;
+            c.Emit(OpCodes.Pop);
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<Player, bool>>((player) => BackSpear != null && BackSpear.CurrentBinding(player.playerState.playerNumber) != KeyCode.None);
+            c.Emit(OpCodes.Brtrue, afterSpearToBack);
+
+            c.Emit(OpCodes.Ldloc_S, (byte)5);
+
+
+            return;
+            #endregion
 
             // TODO: Rewrite to better standard
             #region Extract Spear
