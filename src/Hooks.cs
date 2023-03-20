@@ -56,13 +56,6 @@ namespace RebindEverything
             On.Player.checkInput += Player_checkInput;
         }
 
-        private static void Player_checkInput(On.Player.orig_checkInput orig, Player self)
-        {
-            orig(self);
-
-            if (CanArtiJump(self))
-                self.input[0].jmp = true;
-        }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
@@ -73,7 +66,6 @@ namespace RebindEverything
 
         private static ConditionalWeakTable<Player, PlayerEx> PlayerData = new ConditionalWeakTable<Player, PlayerEx>();
 
-
         private static readonly PlayerKeybind BackSpear = PlayerKeybind.Register("rebindeverything:backspear", "Rebind Everything", "Back Spear", KeyCode.None, KeyCode.None);
         private static PlayerKeybind Craft = null!;
 
@@ -82,6 +74,82 @@ namespace RebindEverything
 
         private static PlayerKeybind ExtractSpear = null!;
         private static PlayerKeybind Ascension = null!;
+
+
+        private static bool CanArtiJump(Player player)
+        {
+            bool isCustomInput = ArtiJump != null && ArtiJump.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            
+            bool flag = player.wantToJump > 0 && player.input[0].pckp;
+            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;    
+
+            if (isCustomInput && player.controller == null)
+                return player.JustPressed(ArtiJump) && !player.pyroJumpped && player.canJump <= 0 && !flag2;
+
+            return flag && !player.pyroJumpped && player.canJump <= 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 && (player.bodyMode == Player.BodyModeIndex.ZeroG || player.gravity <= 0.1f)));
+        }
+
+        private static bool CanArtiParry(Player player)
+        {
+            bool isCustomInput = ArtiParry != null && ArtiParry.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            bool flag = player.wantToJump > 0 && player.input[0].pckp;
+            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
+
+            if (isCustomInput && player.controller == null)
+            {
+                return player.JustPressed(ArtiParry) && !player.submerged && !flag2 && (player.bodyMode == Player.BodyModeIndex.Crawl || player.input[0].y < 0 || player.canJump <= 0);
+            }
+
+            return flag && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == Player.BodyModeIndex.Crawl) && (player.canJump > 0 || player.input[0].y < 0);
+        }
+
+        private static bool CanBackSpear(Player player)
+        {
+            bool isCustomInput = BackSpear != null && BackSpear.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            if (isCustomInput && player.controller == null)
+                return player.IsPressed(BackSpear);
+
+            return player.input[0].pckp;
+        }
+
+        private static bool CanCraft(Player player)
+        {
+            bool isCustomInput = Craft != null && Craft.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            if (isCustomInput && player.controller == null)
+                return player.IsPressed(Craft);
+
+            return player.input[0].pckp;
+        }
+
+        private static bool CanAscension(Player player, bool isActivating)
+        {
+            bool isCustomInput = Ascension != null && Ascension.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+
+            if (isCustomInput && player.controller == null)
+                return player.IsPressed(Ascension);
+
+            if (isActivating)
+                return player.wantToJump > 0 && player.input[0].jmp;
+
+            return player.wantToJump > 0;
+        }
+
+
+        private static void Player_checkInput(On.Player.orig_checkInput orig, Player self)
+        {
+            orig(self);
+
+            // We can replicate the normally required inputs to make gameplay with the rebinds more legitimate
+
+            if (CanArtiJump(self))
+                self.input[0].jmp = true;
+            
+            if (CanArtiParry(self))
+                self.input[0].jmp = true;
+        }
 
         // Arti Jump & Parry
         private static void Player_ClassMechanicsArtificerIL(ILContext il)
@@ -124,24 +192,25 @@ namespace RebindEverything
             // Branch after if check returns false
             c.Emit(OpCodes.Br, afterJump);
             c.Emit(OpCodes.Ldloc, 0);
-
-            Plugin.Logger.LogWarning(c.Context);
-
             #endregion
-
-            return;
 
             #region Arti Parry
             ILLabel afterParryInput = null!;
+            ILLabel afterParry = null!;
 
             c.GotoNext(MoveType.Before,
+                x => x.Match(OpCodes.Call),
+                x => x.MatchBrfalse(out _),
+                x => x.MatchLdarg(0),
                 x => x.MatchLdfld<Player>("canJump"),
                 x => x.MatchLdcI4(0),
                 x => x.MatchBgt(out afterParryInput));
 
+            Plugin.Logger.LogWarning(c.Index);
+
             c.GotoPrev(MoveType.Before,
                 x => x.MatchLdloc(0),
-                x => x.MatchBrfalse(out _),
+                x => x.MatchBrfalse(out afterParry),
                 x => x.MatchLdarg(0),
                 x => x.MatchLdfld<Player>("submerged"));
 
@@ -149,53 +218,21 @@ namespace RebindEverything
             c.Emit(OpCodes.Pop);
             c.Emit(OpCodes.Ldarg_0);
 
-            c.EmitDelegate<Func<Player, bool>>((player) =>
-            {
-                if (ArtiParry == null || ArtiParry.CurrentBinding(player.playerState.playerNumber) == KeyCode.None) return false;
-
-                bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
-                return player.IsPressed(ArtiParry) && !player.submerged && !flag2;
-            });
+            c.EmitDelegate<Func<Player, bool>>((player) => CanArtiParry(player));
 
             c.Emit(OpCodes.Brtrue, afterParryInput);
+            c.Emit(OpCodes.Br, afterParry);
+
             c.Emit(OpCodes.Ldloc, 0);
             #endregion
         }
 
-        // Copied over default conditions
-        private static bool CanArtiJump(Player player)
-        {
-            bool isCustomInput = ArtiJump != null && ArtiJump.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
-            
-            bool flag = player.wantToJump > 0 && player.input[0].pckp;
-            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;    
 
-            if (isCustomInput && player.controller == null)
-                return player.JustPressed(ArtiJump) && !player.pyroJumpped && player.canJump <= 0 && !flag2;
-
-            return flag && !player.pyroJumpped && player.canJump <= 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 && (player.bodyMode == global::Player.BodyModeIndex.ZeroG || player.gravity <= 0.1f)));
-        }
-
-        private static bool CanArtiParry(Player player)
-        {
-            bool isCustomInput = ArtiParry != null && ArtiParry.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
-
-            bool flag = player.wantToJump > 0 && player.input[0].pckp;
-            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
-
-            if (isCustomInput && player.controller == null)
-            {
-                return player.IsPressed(ArtiParry) && !player.submerged && !flag2 && player.canJump > 0;
-            }
-
-            return flag && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == global::Player.BodyModeIndex.Crawl) && (player.canJump > 0 || player.input[0].y < 0);
-        }
-
-        // Spear Extraction
         private static void Player_GrabUpdateIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
 
+            // TODO: Rewrite to better standard
             #region Extract Spear
 
             ILLabel extractionDest = null!;
@@ -296,39 +333,6 @@ namespace RebindEverything
             c.Emit(OpCodes.Brfalse, extractionDest);
             c.Emit(OpCodes.Ldloc_S, (byte)6);
             #endregion
-        }
-
-        private static bool CanBackSpear(Player player)
-        {
-            bool isCustomInput = BackSpear != null && BackSpear.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
-
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(BackSpear);
-
-            return player.input[0].pckp;
-        }
-
-        private static bool CanCraft(Player player)
-        {
-            bool isCustomInput = Craft != null && Craft.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
-
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(Craft);
-
-            return player.input[0].pckp;
-        }
-
-        private static bool CanAscension(Player player, bool isActivating)
-        {
-            bool isCustomInput = Ascension != null && Ascension.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
-
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(Ascension);
-
-            if (isActivating)
-                return player.wantToJump > 0 && player.input[0].jmp;
-
-            return player.wantToJump > 0;
         }
     }
 }
