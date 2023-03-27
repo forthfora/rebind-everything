@@ -31,8 +31,19 @@ namespace RebindEverything
         {
             orig(self);
 
+            BackSlug.HideConfig = !ModManager.MSC && !ModManager.JollyCoop;
+
+            Craft.HideConfig = !ModManager.MSC;
+            ArtiJump.HideConfig = !ModManager.MSC;
+            ArtiParry.HideConfig = !ModManager.MSC;
+            MakeSpear.HideConfig = !ModManager.MSC;
+            Ascension.HideConfig = !ModManager.MSC;
+
+
             if (isInit) return;
             isInit = true;
+
+            MachineConnector.SetRegisteredOI(Plugin.MOD_ID, Options.instance);
 
             try
             {
@@ -41,25 +52,6 @@ namespace RebindEverything
 
                 IL.Player.SpearOnBack.Update += SpearOnBack_UpdateIL;
                 IL.Player.SlugOnBack.Update += SlugOnBack_UpdateIL;
-
-
-                if (ModManager.MSC || ModManager.JollyCoop)
-                    BackSlug = PlayerKeybind.Register("rebindeverything:backslug", "Rebind Everything", "Back Slug", KeyCode.None, KeyCode.None);
-
-                if (ModManager.MSC)
-                {
-
-                    Craft = PlayerKeybind.Register("rebindeverything:craft", "Rebind Everything", "Craft", KeyCode.None, KeyCode.None);
-
-                    ArtiJump = PlayerKeybind.Register("rebindeverything:artijump", "Rebind Everything", "Arti Jump", KeyCode.None, KeyCode.None);
-                    ArtiParry = PlayerKeybind.Register("rebindeverything:artiparry", "Rebind Everything", "Arti Parry", KeyCode.None, KeyCode.None);
-
-                    ExtractSpear = PlayerKeybind.Register("rebindeverything:extractspear", "Rebind Everything", "Extract Spear", KeyCode.None, KeyCode.None);
-
-                    Ascension = PlayerKeybind.Register("rebindeverything:ascension", "Rebind Everything", "Ascension", KeyCode.None, KeyCode.None);
-                }
-
-                Grapple = PlayerKeybind.Register("rebindeverything:grapple", "Rebind Everything", "Grapple", KeyCode.None, KeyCode.None);
             }
             catch (Exception ex)
             {
@@ -68,112 +60,152 @@ namespace RebindEverything
         }
 
 
-        private static ConditionalWeakTable<Player, PlayerEx> PlayerData = new ConditionalWeakTable<Player, PlayerEx>();
+        private static ConditionalWeakTable<Player, PlayerModule> PlayerData = new ConditionalWeakTable<Player, PlayerModule>();
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
 
-            PlayerData.Add(self, new PlayerEx());
+            PlayerData.Add(self, new PlayerModule());
         }
 
 
 
         private static readonly PlayerKeybind BackSpear = PlayerKeybind.Register("rebindeverything:backspear", "Rebind Everything", "Back Spear", KeyCode.None, KeyCode.None);
-        private static PlayerKeybind? Grapple;
 
-        private static PlayerKeybind? BackSlug;
+        private static readonly PlayerKeybind BackSlug = PlayerKeybind.Register("rebindeverything:backslug", "Rebind Everything", "Back Slug", KeyCode.None, KeyCode.None);
 
-        private static PlayerKeybind? Craft;
+        private static readonly PlayerKeybind Craft = PlayerKeybind.Register("rebindeverything:craft", "Rebind Everything", "Craft", KeyCode.None, KeyCode.None);
 
-        private static PlayerKeybind? ArtiJump;
-        private static PlayerKeybind? ArtiParry;
+        private static readonly PlayerKeybind ArtiJump = PlayerKeybind.Register("rebindeverything:artijump", "Rebind Everything", "Arti Jump", KeyCode.None, KeyCode.None);
+        private static readonly PlayerKeybind ArtiParry = PlayerKeybind.Register("rebindeverything:artiparry", "Rebind Everything", "Arti Parry", KeyCode.None, KeyCode.None);
 
-        private static PlayerKeybind? ExtractSpear;
-        
-        private static PlayerKeybind? Ascension;
+        private static readonly PlayerKeybind MakeSpear = PlayerKeybind.Register("rebindeverything:makespear", "Rebind Everything", "Make Spear", KeyCode.None, KeyCode.None);
+
+        private static readonly PlayerKeybind Ascension = PlayerKeybind.Register("rebindeverything:ascension", "Rebind Everything", "Ascension", KeyCode.None, KeyCode.None);
+        private static readonly PlayerKeybind Grapple = PlayerKeybind.Register("rebindeverything:grapple", "Rebind Everything", "Grapple", KeyCode.None, KeyCode.None);
 
 
         #region Input Checks
 
-        private static bool ArtiJumpPressed(Player player)
+        private static bool ArtiJumpPressed(Player self)
         {
-            bool isCustomInput = ArtiJump != null && ArtiJump.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            bool isCustomInput = IsArtiJumpCustomInput(self);
             
-            bool flag = player.wantToJump > 0 && player.input[0].pckp;
-            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;    
+            bool flag = self.wantToJump > 0 && self.input[0].pckp;
+            bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;    
 
-            if (isCustomInput && player.controller == null)
-                return player.JustPressed(ArtiJump) && !player.pyroJumpped && player.canJump <= 0 && !flag2;
+            if (isCustomInput && self.controller == null)
+                return self.JustPressed(ArtiJump) && !self.pyroJumpped && self.canJump <= 0 && !flag2;
 
-            return flag && !player.pyroJumpped && player.canJump <= 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 && (player.bodyMode == Player.BodyModeIndex.ZeroG || player.gravity <= 0.1f)));
+            return flag && !self.pyroJumpped && self.canJump <= 0 && !flag2 && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
         }
 
-        private static bool ArtiParryPressed(Player player)
+        private static bool IsArtiJumpCustomInput(Player self) => self.IsKeyBound(ArtiJump);
+
+
+
+        private static bool ArtiParryPressed(Player self)
         {
-            bool isCustomInput = ArtiParry != null && ArtiParry.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            bool isCustomInput = IsArtiParryCustomInput(self);
 
-            bool flag = player.wantToJump > 0 && player.input[0].pckp;
-            bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
+            bool flag = self.wantToJump > 0 && self.input[0].pckp;
+            bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
 
-            if (isCustomInput && player.controller == null)
-                return player.JustPressed(ArtiParry) && !player.submerged && !flag2 && (player.bodyMode == Player.BodyModeIndex.Crawl || player.input[0].y < 0 || player.canJump <= 0);
+            if (isCustomInput && self.controller == null)
+                return self.JustPressed(ArtiParry) && !self.submerged && !flag2 && (self.bodyMode == Player.BodyModeIndex.Crawl || self.input[0].y < 0 || self.canJump <= 0);
 
-            return flag && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == Player.BodyModeIndex.Crawl) && (player.canJump > 0 || player.input[0].y < 0);
+            return flag && !self.submerged && !flag2 && (self.input[0].y < 0 || self.bodyMode == Player.BodyModeIndex.Crawl) && (self.canJump > 0 || self.input[0].y < 0);
         }
 
-        private static bool BackSpearPressed(Player player)
+        private static bool IsArtiParryCustomInput(Player self) => self.IsKeyBound(ArtiParry);
+
+
+
+        private static bool BackSpearPressed(Player self)
         {
-            bool isCustomInput = BackSpear != null && BackSpear.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            bool isCustomInput = IsBackSpearCustomInput(self);
 
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(BackSpear);
+            if (isCustomInput && self.controller == null)
+                return self.IsPressed(BackSpear);
 
-            return player.input[0].pckp;
+            return self.input[0].pckp;
         }
 
-        private static bool BackSlugPressed(Player player)
+        private static bool IsBackSpearCustomInput(Player self) => self.IsKeyBound(BackSpear);
+
+
+
+        private static bool BackSlugPressed(Player self)
         {
-            bool isCustomInput = BackSlug != null && BackSlug.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            bool isCustomInput = IsBackSlugCustomInput(self);
 
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(BackSlug);
+            if (isCustomInput && self.controller == null)
+                return self.IsPressed(BackSlug);
 
-            return player.input[0].pckp;
+            return self.input[0].pckp;
         }
 
-        private static bool CraftPressed(Player player)
+        private static bool IsBackSlugCustomInput(Player self) => self.IsKeyBound(BackSlug);
+
+
+
+        private static bool CraftPressed(Player self)
         {
-            bool isCustomInput = Craft != null && Craft.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            bool isCustomInput = IsCraftCustomInput(self);
 
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(Craft);
+            if (isCustomInput && self.controller == null)
+                return self.IsPressed(Craft);
 
-            return player.input[0].pckp;
+            return self.input[0].pckp;
         }
 
-        private static bool AscensionPressed(Player player, bool isActivating)
-        {
-            bool isCustomInput = Ascension != null && Ascension.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+        private static bool IsCraftCustomInput(Player self) => self.IsKeyBound(Craft);
 
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(Ascension);
+
+
+        private static bool AscensionPressed(Player self, bool isActivating)
+        {
+            bool isCustomInput = IsAscensionCustomInput(self);
+
+            if (isCustomInput && self.controller == null)
+                return self.IsPressed(Ascension);
 
             if (isActivating)
-                return player.wantToJump > 0 && player.input[0].jmp;
+                return self.wantToJump > 0 && self.input[0].jmp;
 
-            return player.wantToJump > 0;
+            return self.wantToJump > 0;
         }
 
-        private static bool GrapplePressed(Player player)
+        private static bool IsAscensionCustomInput(Player self) => self.IsKeyBound(Ascension);
+
+
+
+        private static bool GrapplePressed(Player self)
         {
-            bool isCustomInput = Grapple != null && Grapple.CurrentBinding(player.playerState.playerNumber) != KeyCode.None;
+            bool isCustomInput = IsGrappleCustomInput(self);
 
-            if (isCustomInput && player.controller == null)
-                return player.IsPressed(Grapple);
+            if (isCustomInput && self.controller == null)
+                return self.IsPressed(Grapple);
 
-            return player.input[0].jmp;
+            return self.input[0].jmp;
         }
+
+        private static bool IsGrappleCustomInput(Player self) => self.IsKeyBound(Grapple);
+
+
+
+        private static bool MakeSpearPressed(Player self)
+        {
+            bool isCustomInput = IsMakeSpearCustomInput(self);
+
+            if (isCustomInput && self.controller == null)
+                return self.IsPressed(MakeSpear);
+
+            return self.input[0].pckp;
+        }
+
+        private static bool IsMakeSpearCustomInput(Player self) => self.IsKeyBound(MakeSpear);
 
         #endregion
 
@@ -199,6 +231,7 @@ namespace RebindEverything
             ILCursor c = new ILCursor(il);
 
             #region Arti Jump
+
             ILLabel afterJumpInput = null!;
             ILLabel afterJump = null!;
 
@@ -225,7 +258,7 @@ namespace RebindEverything
             c.Emit(OpCodes.Pop);
             c.Emit(OpCodes.Ldarg_0);
 
-            c.EmitDelegate<Func<Player, bool>>((player) => ArtiJumpPressed(player));
+            c.EmitDelegate(ArtiJumpPressed);
 
             // Custom check branch
             c.Emit(OpCodes.Brtrue, afterJumpInput);
@@ -233,9 +266,11 @@ namespace RebindEverything
             // Branch after if check returns false
             c.Emit(OpCodes.Br, afterJump);
             c.Emit(OpCodes.Ldloc, 0);
+
             #endregion
 
             #region Arti Parry
+
             ILLabel afterParryInput = null!;
             ILLabel afterParry = null!;
 
@@ -257,25 +292,29 @@ namespace RebindEverything
             c.Emit(OpCodes.Pop);
             c.Emit(OpCodes.Ldarg_0);
 
-            c.EmitDelegate<Func<Player, bool>>((player) => ArtiParryPressed(player));
+            c.EmitDelegate(ArtiParryPressed);
 
             c.Emit(OpCodes.Brtrue, afterParryInput);
             c.Emit(OpCodes.Br, afterParry);
 
             c.Emit(OpCodes.Ldloc, 0);
+
             #endregion
         }
 
 
 
-        // Spear Extraction, Back Spears, Slugpups
+        // Spear Extraction, Back Spear, Back Slug, Craft
         private static void Player_GrabUpdateIL(ILContext il)
         {
             BackSpearSlugIL(il);
-            //ExtractSpearIL(il);
+            MakeSpearIL(il);
+            CraftIL(il);
         }
 
 
+
+        // Back Spears & Slugs
         private static void BackSpearSlugIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
@@ -296,7 +335,11 @@ namespace RebindEverything
             {
                 c.Index++;
                 c.Emit(OpCodes.Pop);
-                c.Emit(OpCodes.Br, afterIncrementFalseSpear);
+
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate(IsBackSpearCustomInput);
+                c.Emit(OpCodes.Brtrue, afterIncrementFalseSpear);
+
                 c.Emit(OpCodes.Ldarg_0);
                 
                 c.Index++;
@@ -317,7 +360,11 @@ namespace RebindEverything
             {
                 c.Index++;
                 c.Emit(OpCodes.Pop);
-                c.Emit(OpCodes.Br, afterIncrementFalseSlug);
+
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate(IsBackSlugCustomInput);
+                c.Emit(OpCodes.Brtrue, afterIncrementFalseSlug);
+                
                 c.Emit(OpCodes.Ldarg_0);
                 
                 c.Index++; 
@@ -327,7 +374,7 @@ namespace RebindEverything
 
             c.Index = 0;
 
-            #region Custom Checks
+            #region Custom Input Checks
 
             c.GotoNext(MoveType.Before,
                 x => x.MatchLdcI4(-1),
@@ -340,8 +387,26 @@ namespace RebindEverything
 
             c.EmitDelegate<Action<int, Player>>((grasps, self) =>
             {
-                bool freeHand = grasps > -1;
+                if (self.slugOnBack == null) return;
                 
+
+                if (!IsBackSlugCustomInput(self)) return;
+
+                if (!PlayerData.TryGetValue(self, out var playerModule)) return;
+
+                
+                if (self.slugOnBack.HasASlug && !playerModule.hadASlug && BackSlugPressed(self))
+                    playerModule.canTakeSlugOffBack = false;
+
+                playerModule.hadASlug = self.slugOnBack.HasASlug;
+
+                if (!BackSlugPressed(self))
+                    playerModule.canTakeSlugOffBack = true;
+
+                if (!playerModule.canTakeSlugOffBack && self.slugOnBack.HasASlug) return;
+
+
+                bool hasFreeHand = grasps > -1;
                 bool holdingSlug = false;
 
                 if (self.CanPutSlugToBack)
@@ -356,9 +421,9 @@ namespace RebindEverything
                     }
                 }
 
-                if (self.spearOnBack.HasASpear) return;
+                if (self.spearOnBack != null && self.spearOnBack.HasASpear) return;
 
-                if (freeHand || self.CanRetrieveSlugFromBack || holdingSlug)
+                if (hasFreeHand || self.CanRetrieveSlugFromBack || holdingSlug)
                     self.slugOnBack.increment = BackSlugPressed(self);
             });
 
@@ -370,8 +435,12 @@ namespace RebindEverything
 
             c.EmitDelegate<Action<int, Player>>((grasps, self) =>
             {
-                bool freeHand = grasps > -1;
+                if (self.spearOnBack == null) return;
 
+
+                if (!IsBackSpearCustomInput(self)) return;
+
+                bool hasFreeHand = grasps > -1;
                 bool holdingSpear = false;
 
                 if (self.CanPutSpearToBack)
@@ -386,7 +455,7 @@ namespace RebindEverything
                     }
                 }
 
-                if (freeHand || self.CanRetrieveSpearFromBack || holdingSpear)
+                if (hasFreeHand || self.CanRetrieveSpearFromBack || holdingSpear)
                     self.spearOnBack.increment = BackSpearPressed(self);
             });
 
@@ -395,12 +464,12 @@ namespace RebindEverything
 
             #region Disable First Increment True Checks
 
-            ILLabel afterSpearToBack = null!;
+            ILLabel afterSlugToBack = null!;
 
             c.GotoNext(MoveType.After,
-                x => x.MatchCallOrCallvirt<Player>("get_CanRetrieveSpearFromBack"),
-                x => x.MatchBrfalse(out afterSpearToBack));
-            
+                x => x.MatchCallOrCallvirt<Player>("get_CanRetrieveSlugFromBack"),
+                x => x.MatchBrfalse(out afterSlugToBack));
+
             c.GotoPrev(MoveType.Before,
                 x => x.MatchLdloc(7),
                 x => x.MatchLdcI4(-1),
@@ -408,13 +477,38 @@ namespace RebindEverything
 
             c.Index++;
             c.Emit(OpCodes.Pop);
-            c.Emit(OpCodes.Br, afterSpearToBack);
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(IsBackSlugCustomInput);
+            c.Emit(OpCodes.Brtrue, afterSlugToBack);
+            
             c.Emit(OpCodes.Ldloc, 7);
+
+
+            ILLabel afterSpearToBack = null!;
+
+            c.GotoNext(MoveType.After,
+                x => x.MatchCallOrCallvirt<Player>("get_CanRetrieveSpearFromBack"),
+                x => x.MatchBrfalse(out afterSpearToBack));
+
+            c.GotoPrev(MoveType.Before,
+                x => x.MatchLdloc(5),
+                x => x.MatchLdcI4(-1),
+                x => x.MatchBgt(out _));
+
+            c.Index++;
+            c.Emit(OpCodes.Pop);
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(IsBackSpearCustomInput);
+            c.Emit(OpCodes.Brtrue, afterSpearToBack);
+
+            c.Emit(OpCodes.Ldloc, 5);
 
             #endregion
 
 
-            #region Disable Secondary Increment True Checks
+            #region Disable Second Increment True Checks
 
             // Move Closer to target
             c.GotoNext(MoveType.After,
@@ -433,20 +527,20 @@ namespace RebindEverything
             c.GotoPrev(MoveType.After,
                 x => x.MatchLdfld<Player.InputPackage>(nameof(Player.InputPackage.pckp)));
 
-            c.Emit(OpCodes.Ldc_I4_0);
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<Player, bool>>((player) => !IsBackSlugCustomInput(player));
             c.Emit(OpCodes.And);
 
 
             // Back Spear
             c.GotoNext(MoveType.After,
                 x => x.MatchLdfld<Player.InputPackage>(nameof(Player.InputPackage.pckp)));
-            
-            c.Emit(OpCodes.Ldc_I4_0);
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<Player, bool>>((player) => !IsBackSpearCustomInput(player));
             c.Emit(OpCodes.And);
 
             #endregion
-
-            //Plugin.Logger.LogWarning(c.Context);
         }
 
         private static void SlugOnBack_UpdateIL(ILContext il)
@@ -475,8 +569,8 @@ namespace RebindEverything
 
 
 
-        // TODO: Cleanup
-        private static void ExtractSpearIL(ILContext il)
+        // TODO: Cleanup (nah lol)
+        private static void MakeSpearIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
 
@@ -489,7 +583,7 @@ namespace RebindEverything
                 PlayerData.TryGetValue(player, out var playerEx);
                 if (playerEx == null) return;
 
-                playerEx.wasExtractSpearInputRegistered = false;
+                playerEx.wasMakeSpearInputRegistered = false;
             });
 
 
@@ -505,14 +599,12 @@ namespace RebindEverything
             c.RemoveRange(5);
 
             c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate<Func<Player, bool>>((player) =>
+            c.EmitDelegate<Func<Player, bool>>((self) =>
             {
-                PlayerData.TryGetValue(player, out var playerEx);
+                PlayerData.TryGetValue(self, out var playerEx);
                 if (playerEx == null) return false;
 
-                if (ExtractSpear == null || ExtractSpear.CurrentBinding(player.playerState.playerNumber) == KeyCode.None || player.controller != null) return player.input[0].pckp;
-
-                return player.IsPressed(ExtractSpear);
+                return MakeSpearPressed(self);
             });
 
 
@@ -539,16 +631,14 @@ namespace RebindEverything
                 x => x.MatchBrtrue(out afterExtractionDest));
 
             c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate<Func<Player, bool>>((player) =>
+            c.EmitDelegate<Func<Player, bool>>((self) =>
             {
-                PlayerData.TryGetValue(player, out var playerEx);
+                PlayerData.TryGetValue(self, out var playerEx);
                 if (playerEx == null) return true;
 
-                playerEx.wasExtractSpearInputRegistered = true;
+                playerEx.wasMakeSpearInputRegistered = true;
 
-                if (ExtractSpear == null || ExtractSpear.CurrentBinding(player.playerState.playerNumber) == KeyCode.None || player.controller != null) return player.input[0].pckp;
-
-                return player.IsPressed(ExtractSpear);
+                return MakeSpearPressed(self);
             });
 
             c.Emit(OpCodes.Brfalse, afterExtractionDest);
@@ -569,14 +659,21 @@ namespace RebindEverything
                 PlayerData.TryGetValue(player, out var playerEx);
                 if (playerEx == null) return false;
 
-                bool wasInputAlreadyProcessed = playerEx.wasExtractSpearInputRegistered;
-                playerEx.wasExtractSpearInputRegistered = true;
+                bool wasInputAlreadyProcessed = playerEx.wasMakeSpearInputRegistered;
+                playerEx.wasMakeSpearInputRegistered = true;
 
                 return wasInputAlreadyProcessed;
             });
 
             c.Emit(OpCodes.Brfalse, extractionDest);
             c.Emit(OpCodes.Ldloc_S, (byte)6);
+        }
+    
+        
+
+        private static void CraftIL(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
         }
     }
 }
