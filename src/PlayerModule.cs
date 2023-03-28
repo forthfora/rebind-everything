@@ -12,5 +12,7 @@ namespace RebindEverything
 
         public bool hadASlug = false;
         public bool canTakeSlugOffBack = false;
+
+        public bool isCrafting = false;
     }
 }

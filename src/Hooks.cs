@@ -1,6 +1,8 @@
-﻿using ImprovedInput;
+﻿using Expedition;
+using ImprovedInput;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -307,8 +309,8 @@ namespace RebindEverything
         // Spear Extraction, Back Spear, Back Slug, Craft
         private static void Player_GrabUpdateIL(ILContext il)
         {
-            BackSpearSlugIL(il);
-            MakeSpearIL(il);
+            //BackSpearSlugIL(il);
+            //MakeSpearIL(il);
             CraftIL(il);
         }
 
@@ -668,12 +670,89 @@ namespace RebindEverything
             c.Emit(OpCodes.Brfalse, extractionDest);
             c.Emit(OpCodes.Ldloc_S, (byte)6);
         }
-    
-        
+
+
 
         private static void CraftIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
+
+            c.GotoNext(MoveType.Before,
+                x => x.MatchLdcI4(-1),
+                x => x.MatchStloc(7));
+
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Action<Player>>((self) =>
+            {
+                if (!PlayerData.TryGetValue(self, out var playerModule)) return;
+
+                playerModule.isCrafting = false;
+
+
+                if (!CraftPressed(self)) return;
+
+                if (ModManager.MSC && (self.FreeHand() == -1 || self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer) && CustomGraspsCanBeCrafted(self))
+                {
+                    self.craftingObject = true;
+                    playerModule.isCrafting = true;
+                    return;
+                }
+            });
+
+
+            c.Emit(OpCodes.Ldloc_1);
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<bool, Player, bool>>((flag3, self) =>
+            {
+                if (!IsCraftCustomInput(self)) return flag3;
+
+                if (!PlayerData.TryGetValue(self, out var playerModule)) return flag3;
+
+                if (playerModule.isCrafting) return true;
+
+                return flag3;
+            });
+            c.Emit(OpCodes.Stloc_1);
+
+
+            c.Emit(OpCodes.Ldloc, 6);
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<int, Player, int>>((num5, self) =>
+            {
+                if (!IsCraftCustomInput(self)) return num5;
+
+                if (!PlayerData.TryGetValue(self, out var playerModule)) return num5;
+
+                if (playerModule.isCrafting) return -1;
+
+                return num5;
+            });
+            c.Emit(OpCodes.Stloc, 6);
+
+
+            c.GotoNext(MoveType.After,
+                x => x.MatchBrfalse(out _),
+                x => x.MatchLdarg(0),
+                x => x.MatchCallOrCallvirt<Player>(nameof(Player.GraspsCanBeCrafted)));
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<Player, bool>>((self) => !IsCraftCustomInput(self));
+            c.Emit(OpCodes.And);
+
+            Plugin.Logger.LogWarning(c.Context);
+        }
+
+        private static bool CustomGraspsCanBeCrafted(Player self)
+        {
+            if ((!(self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer) || !(self.CraftingResults() != null)) && (!(self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Gourmand) || !(self.CraftingResults() != null)))
+            {
+                if (ModManager.Expedition && Custom.rainWorld.ExpeditionMode && ExpeditionGame.activeUnlocks.Contains("unl-crafting"))
+                    return self.CraftingResults() != null;
+                
+                return false;
+            }
+            return true;
         }
     }
 }
