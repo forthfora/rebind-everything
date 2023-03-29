@@ -26,7 +26,12 @@ namespace RebindEverything
             On.Player.checkInput += Player_checkInput;
 
             On.Player.ClassMechanicsSaint += Player_ClassMechanicsSaint; ;
+            On.Player.TongueUpdate += Player_TongueUpdate;
+
+            On.TubeWorm.GrabbedByPlayer += TubeWorm_GrabbedByPlayer;
+            On.TubeWorm.JumpButton += TubeWorm_JumpButton;
         }
+
 
         private static bool isInit = false;
 
@@ -769,12 +774,13 @@ namespace RebindEverything
                 
                 return false;
             }
+
             return true;
         }
 
 
 
-        // Ascension
+        // Ascend & Aim Ascend
         private static void Player_ClassMechanicsSaint(On.Player.orig_ClassMechanicsSaint orig, Player self)
         {
             if (!PlayerData.TryGetValue(self, out var playerModule))
@@ -787,10 +793,13 @@ namespace RebindEverything
             bool wasPckpInput = self.input[0].pckp;
             bool wasThrwInput = self.input[0].thrw;
 
+            bool wasJmpInput = self.input[0].jmp;
+            
+            bool ascensionInput = false;
 
             if (IsAscendCustomInput(self))
             {
-                bool ascensionInput = AscendPressed(self, !self.monkAscension);
+                ascensionInput = AscendPressed(self, !self.monkAscension);
 
                 self.wantToJump = !playerModule.wasAscensionInput && ascensionInput ? 1 : 0;
 
@@ -808,6 +817,13 @@ namespace RebindEverything
                     self.input[0].thrw = moveAscensionInput;
             }
 
+            if (IsGrappleCustomInput(self) && !ascensionInput)
+            {
+                bool grappleInput = GrapplePressed(self);
+
+                self.input[0].jmp = grappleInput && !playerModule.wasGrappleInput;
+            }
+
 
             orig(self);
 
@@ -815,6 +831,88 @@ namespace RebindEverything
             self.wantToJump = wasWantToJump;
             self.input[0].pckp = wasPckpInput;
             self.input[0].thrw = wasThrwInput;
+            self.input[0].jmp = wasJmpInput;
+        }
+
+        private static void Player_TongueUpdate(On.Player.orig_TongueUpdate orig, Player self)
+        {
+            if (!PlayerData.TryGetValue(self, out var playerModule))
+            {
+                orig(self);
+                return;
+            }
+
+
+            bool wasJmpInput = self.input[0].jmp;
+            bool wasJmpInputLastFrame = self.input[1].jmp;
+
+            if (IsGrappleCustomInput(self))
+            {
+                bool grappleInput = GrapplePressed(self);
+
+
+                self.input[0].jmp = grappleInput;
+                self.input[1].jmp = playerModule.wasGrappleInput;
+
+                playerModule.wasGrappleInput = grappleInput;
+            }
+
+            orig(self);
+
+            self.input[0].jmp = wasJmpInput;
+            self.input[1].jmp = wasJmpInputLastFrame;
+        }
+
+        private static void TubeWorm_GrabbedByPlayer(On.TubeWorm.orig_GrabbedByPlayer orig, TubeWorm self)
+        {
+            Player? player = null;
+            for (int i = 0; i < self.grabbedBy.Count; i++)
+            {
+                if (self.grabbedBy[i].grabber is Player)
+                {
+                    player = self.grabbedBy[i].grabber as Player;
+                    break;
+                }
+            }
+
+            if (player == null)
+            {
+                orig(self);
+                return;
+            }
+
+
+            bool wasJmpInput = player.input[0].jmp;
+
+            if (IsGrappleCustomInput(player))
+            {
+                bool grappleInput = GrapplePressed(player);
+
+                player.input[0].jmp = grappleInput;
+            }
+
+            orig(self);
+
+            player.input[0].jmp = wasJmpInput;
+        }
+
+        private static bool TubeWorm_JumpButton(On.TubeWorm.orig_JumpButton orig, TubeWorm self, Player plr)
+        {
+            int wasCanJump = plr.canJump;
+
+            if (IsGrappleCustomInput(plr))
+            {
+                bool grappleInput = GrapplePressed(plr);
+
+                if (grappleInput)
+                    plr.canJump = 0;
+            }
+
+            bool result = orig(self, plr);
+
+            plr.canJump = wasCanJump;
+
+            return result;
         }
     }
 }

@@ -15,6 +15,8 @@ namespace RebindEverything
 
         public bool isCrafting = false;
 
-        public bool wasAscensionInput;
+        public bool wasAscensionInput = false;
+
+        public bool wasGrappleInput = false;
     }
 }
