@@ -56,13 +56,13 @@ namespace RebindEverything
 
             AddTab(ref tabIndex, "General");
 
-            AddNewLine();
+            AddNewLine(9);
             
             AddTextLabel("To configure the input bindings with this mod, look at the normal Input Settings menu under Options!", FLabelAlignment.Center, true);
             DrawTextLabels(ref Tabs[tabIndex]);
 
 
-            AddNewLine(17);
+            AddNewLine(9);
             DrawBox(ref Tabs[tabIndex]);
         }
 

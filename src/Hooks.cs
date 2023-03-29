@@ -21,6 +21,8 @@ namespace RebindEverything
         public static void ApplyHooks()
         {
             On.RainWorld.OnModsInit += RainWorld_OnModsInit;
+            On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+
             On.Player.ctor += Player_ctor;
 
             On.Player.checkInput += Player_checkInput;
@@ -39,15 +41,6 @@ namespace RebindEverything
         {
             try
             {
-                BackSlug.HideConfig = !ModManager.MSC && !ModManager.JollyCoop;
-
-                Craft.HideConfig = !ModManager.MSC;
-                ArtiJump.HideConfig = !ModManager.MSC;
-                ArtiParry.HideConfig = !ModManager.MSC;
-                MakeSpear.HideConfig = !ModManager.MSC;
-                Ascend.HideConfig = !ModManager.MSC;
-                AimAscend.HideConfig = !ModManager.MSC;
-
                 if (isInit) return;
                 isInit = true;
 
@@ -69,6 +62,21 @@ namespace RebindEverything
                 orig(self);
             }
         }
+
+        private static void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
+        {
+            orig(self);
+
+            BackSlug.HideConfig = !ModManager.MSC && !ModManager.JollyCoop;
+
+            Craft.HideConfig = !ModManager.MSC;
+            ArtiJump.HideConfig = !ModManager.MSC || MachineConnector.IsThisModActive("danizk0.rebindartificer");
+            ArtiParry.HideConfig = !ModManager.MSC || MachineConnector.IsThisModActive("danizk0.rebindartificer");
+            MakeSpear.HideConfig = !ModManager.MSC;
+            Ascend.HideConfig = !ModManager.MSC;
+            AimAscend.HideConfig = !ModManager.MSC;
+        }
+
 
 
         private static ConditionalWeakTable<Player, PlayerModule> PlayerData = new ConditionalWeakTable<Player, PlayerModule>();
@@ -126,12 +134,12 @@ namespace RebindEverything
             bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
 
             if (isCustomInput)
-                return self.JustPressed(ArtiParry) && !self.submerged && !flag2 && (self.bodyMode == Player.BodyModeIndex.Crawl || self.input[0].y < 0 || self.canJump <= 0);
+                return self.JustPressed(ArtiParry) && !self.submerged && !flag2;
 
             return flag && !self.submerged && !flag2 && (self.input[0].y < 0 || self.bodyMode == Player.BodyModeIndex.Crawl) && (self.canJump > 0 || self.input[0].y < 0);
         }
 
-        private static bool IsArtiParryCustomInput(Player self) => self.IsKeyBound(ArtiParry) && self.controller == null;
+        private static bool IsArtiParryCustomInput(Player self) => self.IsKeyBound(ArtiParry) && !ArtiParry.HideConfig && self.controller == null;
 
 
 
@@ -145,7 +153,7 @@ namespace RebindEverything
             return self.input[0].pckp;
         }
 
-        private static bool IsBackSpearCustomInput(Player self) => self.IsKeyBound(BackSpear) && self.controller == null;
+        private static bool IsBackSpearCustomInput(Player self) => self.IsKeyBound(BackSpear) && !BackSpear.HideConfig && self.controller == null;
 
 
 
@@ -159,7 +167,7 @@ namespace RebindEverything
             return self.input[0].pckp;
         }
 
-        private static bool IsBackSlugCustomInput(Player self) => self.IsKeyBound(BackSlug) && self.controller == null;
+        private static bool IsBackSlugCustomInput(Player self) => self.IsKeyBound(BackSlug) && !BackSlug.HideConfig && self.controller == null;
 
 
 
@@ -173,7 +181,7 @@ namespace RebindEverything
             return self.input[0].pckp;
         }
 
-        private static bool IsCraftCustomInput(Player self) => self.IsKeyBound(Craft) && self.controller == null;
+        private static bool IsCraftCustomInput(Player self) => self.IsKeyBound(Craft) && !Craft.HideConfig && self.controller == null;
 
 
 
@@ -190,7 +198,7 @@ namespace RebindEverything
             return self.wantToJump > 0;
         }
 
-        private static bool IsAscendCustomInput(Player self) => self.IsKeyBound(Ascend) && self.controller == null;
+        private static bool IsAscendCustomInput(Player self) => self.IsKeyBound(Ascend) && !Ascend.HideConfig && self.controller == null;
 
 
         private static bool AimAscendPressed(Player self)
@@ -203,7 +211,7 @@ namespace RebindEverything
             return self.input[0].thrw;
         }
 
-        private static bool IsAimAscendCustomInput(Player self) => self.IsKeyBound(AimAscend) && self.controller == null;
+        private static bool IsAimAscendCustomInput(Player self) => self.IsKeyBound(AimAscend) && !AimAscend.HideConfig && self.controller == null;
 
 
         private static bool GrapplePressed(Player self)
@@ -216,7 +224,7 @@ namespace RebindEverything
             return self.input[0].jmp;
         }
 
-        private static bool IsGrappleCustomInput(Player self) => self.IsKeyBound(Grapple) && self.controller == null;
+        private static bool IsGrappleCustomInput(Player self) => self.IsKeyBound(Grapple) && !Grapple.HideConfig && self.controller == null;
 
 
 
@@ -230,7 +238,7 @@ namespace RebindEverything
             return self.input[0].pckp;
         }
 
-        private static bool IsMakeSpearCustomInput(Player self) => self.IsKeyBound(MakeSpear) && self.controller == null;
+        private static bool IsMakeSpearCustomInput(Player self) => self.IsKeyBound(MakeSpear) && !MakeSpear.HideConfig && self.controller == null;
 
         #endregion
 
@@ -241,16 +249,20 @@ namespace RebindEverything
 
             // We can replicate the normally required inputs to make gameplay with the rebinds more legitimate
 
-            if (ArtiJumpPressed(self))
+            if (IsArtiJumpCustomInput(self) && ArtiJumpPressed(self))
                 self.input[0].jmp = true;
             
-            if (ArtiParryPressed(self))
+            if (IsArtiParryCustomInput(self) && ArtiParryPressed(self))
+            {
                 self.input[0].jmp = true;
+                self.input[0].y = -1;
+            }
         }
 
 
 
         // Arti Jump & Parry
+        // I realised later that IL Hooking wasn't necessary, oh well...
         private static void Player_ClassMechanicsArtificerIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
@@ -340,6 +352,7 @@ namespace RebindEverything
 
 
         // Back Spears & Slugs
+        // Warning: Moderate pain
         private static void BackSpearSlugIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
@@ -780,7 +793,7 @@ namespace RebindEverything
 
 
 
-        // Ascend & Aim Ascend
+        // Ascend, Aim Ascend & Grapple
         private static void Player_ClassMechanicsSaint(On.Player.orig_ClassMechanicsSaint orig, Player self)
         {
             if (!PlayerData.TryGetValue(self, out var playerModule))
@@ -834,6 +847,9 @@ namespace RebindEverything
             self.input[0].jmp = wasJmpInput;
         }
 
+
+
+        // Grapple
         private static void Player_TongueUpdate(On.Player.orig_TongueUpdate orig, Player self)
         {
             if (!PlayerData.TryGetValue(self, out var playerModule))
