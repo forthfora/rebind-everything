@@ -261,15 +261,17 @@ namespace RebindEverything
         {
             orig(self);
 
-            // We can replicate the normally required inputs to make gameplay with the rebinds more legitimate
-
-            if (IsArtiJumpCustomInput(self) && ArtiJumpPressed(self))
-                self.input[0].jmp = true;
-            
-            if (IsArtiParryCustomInput(self) && ArtiParryPressed(self))
+            if (self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer)
             {
-                self.input[0].jmp = true;
-                self.input[0].y = -1;
+                // We can replicate the normally required inputs to make gameplay with the rebinds more legitimate
+                if (IsArtiJumpCustomInput(self) && ArtiJumpPressed(self))
+                    self.input[0].jmp = true;
+            
+                if (IsArtiParryCustomInput(self) && ArtiParryPressed(self))
+                {
+                    self.input[0].jmp = true;
+                    self.input[0].y = -1;
+                }
             }
         }
 
