@@ -929,7 +929,7 @@ namespace RebindEverything
         {
             int wasCanJump = plr.canJump;
 
-            if (IsGrappleCustomInput(plr))
+            if (IsGrappleCustomInput(plr) && plr.canJump >= 1 && plr.bodyMode != Player.BodyModeIndex.Default)
             {
                 bool grappleInput = GrapplePressed(plr);
 
