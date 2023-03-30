@@ -1,0 +1,19 @@
+[h1]Provides options for rebinding all Slugcat abilities, via Improved Input Config![/h1]
+
+[h1]Instead of through the Remix config menu, configure this mod via the normal Input Settings under Options![/h1]
+
+[b]Provides options to rebind all of the following:[/b]
+[list]
+    [*]Back Spears
+    [*]Back Slugs
+    [*]Artificer's Jump
+    [*]Artificer's Parry
+    [*]Gourmand & Artificer's Crafting
+    [*]Saint's Ascension
+    [*]Aiming Saint's Ascension
+    [*]Grappling (Tongue & Grapple Worm)
+[/list]
+
+[b]For any inputs left unbound, the default behavior is used![b]
+
+[b][u]Source: https://github.com/forthbridge/rebind-everything[/u][/b]

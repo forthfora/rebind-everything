@@ -52,6 +52,8 @@ namespace RebindEverything
 
                 IL.Player.SpearOnBack.Update += SpearOnBack_UpdateIL;
                 IL.Player.SlugOnBack.Update += SlugOnBack_UpdateIL;
+
+                IL.Player.Update += Player_Update;
             }
             catch (Exception ex)
             {
@@ -920,8 +922,7 @@ namespace RebindEverything
             {
                 bool grappleInput = GrapplePressed(plr);
 
-                if (grappleInput)
-                    plr.canJump = 0;
+                plr.canJump = grappleInput ? 0 : 1;
             }
 
             bool result = orig(self, plr);
@@ -929,6 +930,32 @@ namespace RebindEverything
             plr.canJump = wasCanJump;
 
             return result;
+        }
+
+        // grapple worms i hate you
+        private static void Player_Update(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.GotoNext(MoveType.After,
+                x => x.MatchCallOrCallvirt<Room>(nameof(Room.PlaySound)),
+                x => x.MatchPop(),
+                x => x.MatchLdarg(0),
+                x => x.MatchCallOrCallvirt<Player>("get_input"));
+
+            c.GotoNext(MoveType.After,
+                x => x.MatchLdloc(1));
+
+
+            c.Emit(OpCodes.Ldarg_0);
+
+            c.EmitDelegate<Func<bool, Player, bool>>((input, self) =>
+            {
+                if (!IsGrappleCustomInput(self))
+                    return input;
+
+                return self.JustPressed(Grapple);
+            });
         }
     }
 }
