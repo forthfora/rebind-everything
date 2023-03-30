@@ -46,6 +46,18 @@ namespace RebindEverything
 
                 MachineConnector.SetRegisteredOI(Plugin.MOD_ID, Options.instance);
 
+                BackSpear.Description = "The key held to make Hunter either put or retrieve a spear from their back.";
+                BackSlug.Description = "The key held to put or retrieve a Slugcat from your back.";
+
+                Craft.Description = "The key held to make Artificer or Gourmand craft the items they are holding.";
+                ArtiJump.Description = "The key pressed to make Artificer double jump, only works mid-air.";
+                ArtiParry.Description = "The key pressed to make Artificer parry, forces a down input.";
+                MakeSpear.Description = "The key held to have Spearmaster make a new spear.";
+                Ascend.Description = "The key pressed to toggle Saint's ascension mode.";
+                AimAscend.Description = "The key held to move the Saint's ascension reticle around.";
+
+                Grapple.Description = "Affects Saint's Tongue & Grapple Worms.";
+
 
                 IL.Player.GrabUpdate += Player_GrabUpdateIL;
                 IL.Player.ClassMechanicsArtificer += Player_ClassMechanicsArtificerIL;
@@ -818,7 +830,7 @@ namespace RebindEverything
 
                 self.wantToJump = !playerModule.wasAscensionInput && ascensionInput ? 1 : 0;
 
-                if (!self.monkAscension)
+                if (!self.monkAscension && !playerModule.wasAscensionInput)
                     self.input[0].pckp = ascensionInput;
 
                 playerModule.wasAscensionInput = ascensionInput;
