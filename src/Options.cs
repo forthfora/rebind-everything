@@ -62,7 +62,7 @@ namespace RebindEverything
             DrawTextLabels(ref Tabs[tabIndex]);
 
 
-            AddNewLine(9);
+            AddNewLine(10);
             DrawBox(ref Tabs[tabIndex]);
         }
 
