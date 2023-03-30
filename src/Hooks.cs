@@ -205,7 +205,7 @@ namespace RebindEverything
 
         private static bool AimAscendPressed(Player self)
         {
-            bool isCustomInput = IsAscendCustomInput(self);
+            bool isCustomInput = IsAimAscendCustomInput(self);
 
             if (isCustomInput)
                 return self.IsPressed(AimAscend);
@@ -809,7 +809,7 @@ namespace RebindEverything
             bool wasThrwInput = self.input[0].thrw;
 
             bool wasJmpInput = self.input[0].jmp;
-            
+
             bool ascensionInput = false;
 
             if (IsAscendCustomInput(self))
@@ -833,17 +833,14 @@ namespace RebindEverything
             }
 
             if (IsGrappleCustomInput(self) && !ascensionInput)
-            {
-                bool grappleInput = GrapplePressed(self);
-
-                self.input[0].jmp = grappleInput && !playerModule.wasGrappleInput;
-            }
+                self.input[0].jmp = self.JustPressed(Grapple);
 
 
             orig(self);
 
+            if (!self.monkAscension)
+                self.wantToJump = wasWantToJump;
 
-            self.wantToJump = wasWantToJump;
             self.input[0].pckp = wasPckpInput;
             self.input[0].thrw = wasThrwInput;
             self.input[0].jmp = wasJmpInput;
