@@ -127,8 +127,6 @@ namespace RebindEverything
             bool isCustomInput = IsArtiJumpCustomInput(self);
             bool isParryOverride = IsArtiParryCustomInput(self) && self.input[0].y < 0;
 
-            Plugin.Logger.LogWarning(isParryOverride);
-
             bool flag = self.wantToJump > 0 && self.input[0].pckp;
             bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;    
 
