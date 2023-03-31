@@ -161,6 +161,8 @@ namespace RebindEverything
 
         private static bool BackSpearPressed(Player self)
         {
+            if (self.PlayerGraspsHas(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC) == 0 && self.PlayerGraspsHas(AbstractPhysicalObject.AbstractObjectType.Spear) >= 0) return false;
+         
             bool isCustomInput = IsBackSpearCustomInput(self);
 
             if (isCustomInput)
@@ -175,6 +177,8 @@ namespace RebindEverything
 
         private static bool BackSlugPressed(Player self)
         {
+            if (self.PlayerGraspsHas(AbstractPhysicalObject.AbstractObjectType.Spear) == 0 && self.PlayerGraspsHas(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC) >= 0) return false;
+
             bool isCustomInput = IsBackSlugCustomInput(self);
 
             if (isCustomInput)
@@ -974,6 +978,38 @@ namespace RebindEverything
 
                 return self.JustPressed(Grapple) && self.canJump < 1;
             });
+        }
+
+
+
+        private static int PlayerGraspsHas(this Player self, AbstractPhysicalObject.AbstractObjectType type)
+        {
+            for (int i = 0; i < self.grasps.Length; i++)
+            {
+                Creature.Grasp? grasp = self.grasps[i];
+                if (grasp == null) continue;
+
+                if (grasp.grabbed.abstractPhysicalObject.type == type)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        private static int PlayerGraspsHas(this Player self, CreatureTemplate.Type type)
+        {
+            for (int i = 0; i < self.grasps.Length; i++)
+            {
+                Creature.Grasp? grasp = self.grasps[i];
+                if (grasp == null) continue;
+
+                if (grasp.grabbed is not Creature creature) continue;
+
+                if (creature.Template.type == type)
+                    return i;
+            }
+
+            return -1;
         }
     }
 }
