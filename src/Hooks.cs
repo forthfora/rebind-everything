@@ -834,25 +834,14 @@ namespace RebindEverything
             bool wasThrwInput = self.input[0].thrw;
             bool wasJmpInput = self.input[0].jmp;
 
-            bool restoreWantToJumpInput = true;
+            bool wasAscension = self.monkAscension;
 
             if (IsAscendCustomInput(self))
             {
                 bool ascensionInput = self.JustPressed(Ascend);
 
-                self.wantToJump = 0;
-                self.input[0].pckp = false;
-
-                if (ascensionInput)
-                {
-                    self.wantToJump = 1;
-                    
-                    if (!self.monkAscension)
-                        self.input[0].pckp = true;
-                    
-                    else
-                        restoreWantToJumpInput = false;
-                }
+                self.wantToJump = ascensionInput ? 1 : 0;
+                self.input[0].pckp = ascensionInput && !self.monkAscension;
             }
 
             if (IsAimAscendCustomInput(self))
@@ -871,10 +860,9 @@ namespace RebindEverything
             orig(self);
 
 
-            if (restoreWantToJumpInput)
+            if (wasAscension == self.monkAscension)
                 self.wantToJump = wasWantToJump;
 
-            self.wantToJump = wasWantToJump;
             self.input[0].pckp = wasPckpInput;
             self.input[0].thrw = wasThrwInput;
             self.input[0].jmp = wasJmpInput;
