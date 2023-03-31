@@ -31,7 +31,6 @@ namespace RebindEverything
             On.Player.TongueUpdate += Player_TongueUpdate;
 
             On.TubeWorm.GrabbedByPlayer += TubeWorm_GrabbedByPlayer;
-            On.TubeWorm.JumpButton += TubeWorm_JumpButton;
         }
 
 
@@ -126,12 +125,15 @@ namespace RebindEverything
         private static bool ArtiJumpPressed(Player self)
         {
             bool isCustomInput = IsArtiJumpCustomInput(self);
-            
+            bool isParryOverride = IsArtiParryCustomInput(self) && self.input[0].y < 0;
+
+            Plugin.Logger.LogWarning(isParryOverride);
+
             bool flag = self.wantToJump > 0 && self.input[0].pckp;
             bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;    
 
             if (isCustomInput)
-                return self.JustPressed(ArtiJump) && !self.pyroJumpped && self.canJump <= 0 && !flag2;
+                return self.JustPressed(ArtiJump) && !self.pyroJumpped && self.canJump <= 0 && !flag2 && !isParryOverride;
 
             return flag && !self.pyroJumpped && self.canJump <= 0 && !flag2 && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
         }
@@ -215,6 +217,7 @@ namespace RebindEverything
         private static bool IsAscendCustomInput(Player self) => self.IsKeyBound(Ascend) && !Ascend.HideConfig && self.controller == null;
 
 
+
         private static bool AimAscendPressed(Player self)
         {
             bool isCustomInput = IsAimAscendCustomInput(self);
@@ -226,6 +229,7 @@ namespace RebindEverything
         }
 
         private static bool IsAimAscendCustomInput(Player self) => self.IsKeyBound(AimAscend) && !AimAscend.HideConfig && self.controller == null;
+
 
 
         private static bool GrapplePressed(Player self)
@@ -266,12 +270,14 @@ namespace RebindEverything
                 // We can replicate the normally required inputs to make gameplay with the rebinds more legitimate
                 if (IsArtiJumpCustomInput(self) && ArtiJumpPressed(self))
                     self.input[0].jmp = true;
-            
-                if (IsArtiParryCustomInput(self) && ArtiParryPressed(self))
-                {
-                    self.input[0].jmp = true;
+
+                else if (IsArtiParryCustomInput(self) && ArtiParryPressed(self))
                     self.input[0].y = -1;
-                }
+
+
+
+                if (IsArtiParryCustomInput(self) && ArtiParryPressed(self))
+                    self.input[0].jmp = true;
             }
         }
 
@@ -818,24 +824,31 @@ namespace RebindEverything
                 return;
             }
 
+
             int wasWantToJump = self.wantToJump;
             bool wasPckpInput = self.input[0].pckp;
             bool wasThrwInput = self.input[0].thrw;
-
             bool wasJmpInput = self.input[0].jmp;
 
-            bool ascensionInput = false;
+            bool restoreWantToJumpInput = true;
 
             if (IsAscendCustomInput(self))
             {
-                ascensionInput = AscendPressed(self, !self.monkAscension);
+                bool ascensionInput = self.JustPressed(Ascend);
 
-                self.wantToJump = !playerModule.wasAscensionInput && ascensionInput ? 1 : 0;
+                self.wantToJump = 0;
+                self.input[0].pckp = false;
 
-                if (!self.monkAscension && !playerModule.wasAscensionInput)
-                    self.input[0].pckp = ascensionInput;
-
-                playerModule.wasAscensionInput = ascensionInput;
+                if (ascensionInput)
+                {
+                    self.wantToJump = 1;
+                    
+                    if (!self.monkAscension)
+                        self.input[0].pckp = true;
+                    
+                    else
+                        restoreWantToJumpInput = false;
+                }
             }
 
             if (IsAimAscendCustomInput(self))
@@ -846,15 +859,18 @@ namespace RebindEverything
                     self.input[0].thrw = moveAscensionInput;
             }
 
-            if (IsGrappleCustomInput(self) && !ascensionInput)
+            if (IsGrappleCustomInput(self))
                 self.input[0].jmp = self.JustPressed(Grapple);
+
 
 
             orig(self);
 
-            if (!self.monkAscension)
+
+            if (restoreWantToJumpInput)
                 self.wantToJump = wasWantToJump;
 
+            self.wantToJump = wasWantToJump;
             self.input[0].pckp = wasPckpInput;
             self.input[0].thrw = wasThrwInput;
             self.input[0].jmp = wasJmpInput;
@@ -875,18 +891,21 @@ namespace RebindEverything
             bool wasJmpInput = self.input[0].jmp;
             bool wasJmpInputLastFrame = self.input[1].jmp;
 
+
+
             if (IsGrappleCustomInput(self))
             {
-                bool grappleInput = GrapplePressed(self);
-
+                bool grappleInput = self.JustPressed(Grapple);
 
                 self.input[0].jmp = grappleInput;
-                self.input[1].jmp = playerModule.wasGrappleInput;
-
-                playerModule.wasGrappleInput = grappleInput;
+                self.input[1].jmp = false;
             }
 
+
+
             orig(self);
+
+
 
             self.input[0].jmp = wasJmpInput;
             self.input[1].jmp = wasJmpInputLastFrame;
@@ -911,7 +930,10 @@ namespace RebindEverything
             }
 
 
+
             bool wasJmpInput = player.input[0].jmp;
+
+
 
             if (IsGrappleCustomInput(player))
             {
@@ -920,28 +942,13 @@ namespace RebindEverything
                 player.input[0].jmp = grappleInput;
             }
 
+
+
             orig(self);
 
             player.input[0].jmp = wasJmpInput;
         }
 
-        private static bool TubeWorm_JumpButton(On.TubeWorm.orig_JumpButton orig, TubeWorm self, Player plr)
-        {
-            int wasCanJump = plr.canJump;
-
-            if (IsGrappleCustomInput(plr) && plr.canJump >= 1 && plr.bodyMode != Player.BodyModeIndex.Default)
-            {
-                bool grappleInput = GrapplePressed(plr);
-
-                plr.canJump = grappleInput ? 0 : 1;
-            }
-
-            bool result = orig(self, plr);
-
-            plr.canJump = wasCanJump;
-
-            return result;
-        }
 
         // grapple worms i hate you
         private static void Player_Update(ILContext il)
@@ -965,7 +972,7 @@ namespace RebindEverything
                 if (!IsGrappleCustomInput(self))
                     return input;
 
-                return self.JustPressed(Grapple);
+                return self.JustPressed(Grapple) && self.canJump < 1;
             });
         }
     }
