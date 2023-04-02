@@ -17,7 +17,7 @@ namespace RebindEverything
     {
         public static new ManualLogSource Logger { get; private set; } = null!;
 
-        public const string VERSION = "1.0.0";  
+        public const string VERSION = "1.0.1";  
         public const string MOD_NAME = "Rebind Everything";
         public const string MOD_ID = "rebindeverything";
         public const string AUTHOR = "forthbridge";

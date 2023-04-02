@@ -1,7 +1,7 @@
 {
 	"id": "rebindeverything",
 	"name": "Rebind Everything",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"authors": "forthbridge",
 	"description": "Provides options for rebinding all Slugcat abilities, via Improved Input Config!<LINE><LINE>Instead of through the Remix config menu, configure this mod<LINE>via the normal Input Settings under Options!<LINE><LINE>Source: https://github.com/forthbridge/rebind-everything",
 	"requirements": ["improved-input-config"],

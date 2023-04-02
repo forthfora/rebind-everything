@@ -13,6 +13,9 @@ namespace RebindEverything
 
         #region Options
 
+        public static Configurable<bool> artiJumpInput = instance.config.Bind("artiJumpInput", true, new ConfigurableInfo(
+            "When checked, pressing either Arti Jump or Arti Parry will cause a jump input, mimick the original binding's behavior.",
+            null, "", "Arti Jump Input?"));
 
         #endregion
 
@@ -56,13 +59,17 @@ namespace RebindEverything
 
             AddTab(ref tabIndex, "General");
 
-            AddNewLine(9);
+            AddNewLine(2);
             
             AddTextLabel("To configure the input bindings with this mod, look at the normal Input Settings menu under Options!", FLabelAlignment.Center, true);
             DrawTextLabels(ref Tabs[tabIndex]);
 
+            AddNewLine(1);
 
-            AddNewLine(10);
+            AddCheckBox(artiJumpInput, (string)artiJumpInput.info.Tags[0]);
+            DrawCheckBoxes(ref Tabs[tabIndex]);
+
+            AddNewLine(13);
             DrawBox(ref Tabs[tabIndex]);
         }
 
