@@ -9,6 +9,7 @@
     [*]Artificer's Jump
     [*]Artificer's Parry
     [*]Gourmand & Artificer's Crafting
+    [*]Spearmaster's Spear Extraction
     [*]Saint's Ascension
     [*]Aiming Saint's Ascension
     [*]Grappling (Tongue & Grapple Worm)
@@ -16,4 +17,7 @@
 
 [b]For any inputs left unbound, the default behavior is used![b]
 
+[u][b]Improved Input Config may show a warning if multiple bindings share the same key, but otherwise the rebinds should still work perfectly fine in this case![/b][/u]
+
+[b](main thumbnail by my sister, alternate art by Scavenger#8664)[/b]
 [b][u]Source: https://github.com/forthbridge/rebind-everything[/u][/b]

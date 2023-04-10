@@ -132,7 +132,7 @@ namespace RebindEverything
 
         #region Input Checks
 
-        private static bool ArtiJumpPressed(Player self, bool isJustPressed)
+        private static bool ArtiJumpPressed(Player self)
         {
             bool isCustomInput = IsArtiJumpCustomInput(self);
             bool isParryOverride = IsArtiParryCustomInput(self) && self.input[0].y < 0;
@@ -141,10 +141,8 @@ namespace RebindEverything
             bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
 
 
-            bool customInput = isJustPressed ? self.JustPressed(ArtiJump) : self.IsPressed(ArtiJump);
-
             if (isCustomInput)
-                return customInput && !self.pyroJumpped && self.canJump <= 0 && !flag2 && !isParryOverride;
+                return self.JustPressed(ArtiJump) && !self.pyroJumpped && self.canJump <= 0 && !flag2 && !isParryOverride;
 
             return flag && !self.pyroJumpped && self.canJump <= 0 && !flag2 && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
         }
@@ -153,7 +151,7 @@ namespace RebindEverything
 
 
 
-        private static bool ArtiParryPressed(Player self, bool isJustPressed)
+        private static bool ArtiParryPressed(Player self)
         {
             bool isCustomInput = IsArtiParryCustomInput(self);
 
@@ -161,10 +159,8 @@ namespace RebindEverything
             bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
 
 
-            bool customInput = isJustPressed ? self.JustPressed(ArtiParry) : self.IsPressed(ArtiParry);
-
             if (isCustomInput)
-                return customInput && !self.submerged && !flag2;
+                return self.JustPressed(ArtiParry) && !self.submerged && !flag2;
 
             return flag && !self.submerged && !flag2 && (self.input[0].y < 0 || self.bodyMode == Player.BodyModeIndex.Crawl) && (self.canJump > 0 || self.input[0].y < 0);
         }
@@ -284,17 +280,25 @@ namespace RebindEverything
             orig(self);
 
             // We can replicate the normally required inputs to make gameplay with the rebinds more legitimate
-            if (self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer && Options.artiJumpInput.Value)
+            if ((self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer || (ExpeditionGame.explosivejump && !self.isSlugpup)) && Options.artiJumpInput.Value)
             {
-                if (IsArtiJumpCustomInput(self) && ArtiJumpPressed(self, false))
+                bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
+                bool isParryOverride = IsArtiParryCustomInput(self) && self.input[0].y < 0;
+
+
+                bool artiJumpInput = IsArtiJumpCustomInput(self) && self.IsPressed(ArtiJump) && self.canJump <= 0 && !flag2 && self.bodyMode == Player.BodyModeIndex.Default && !isParryOverride;
+
+                if (artiJumpInput) 
                     self.input[0].jmp = true;
 
 
 
-                else if (IsArtiParryCustomInput(self) && ArtiParryPressed(self, false))
+                bool artiParryInput = IsArtiParryCustomInput(self) && self.IsPressed(ArtiParry) && !self.submerged && !flag2;
+
+                if (!artiJumpInput && artiParryInput)
                     self.input[0].y = -1;
 
-                if (IsArtiParryCustomInput(self) && ArtiParryPressed(self, false))
+                if (artiParryInput)
                     self.input[0].jmp = true;
             }
         }
@@ -335,7 +339,7 @@ namespace RebindEverything
             c.Emit(OpCodes.Pop);
             c.Emit(OpCodes.Ldarg_0);
 
-            c.EmitDelegate<Func<Player, bool>>((self) => ArtiJumpPressed(self, true));
+            c.EmitDelegate<Func<Player, bool>>((self) => ArtiJumpPressed(self));
 
             // Custom check branch
             c.Emit(OpCodes.Brtrue, afterJumpInput);
@@ -369,7 +373,7 @@ namespace RebindEverything
             c.Emit(OpCodes.Pop);
             c.Emit(OpCodes.Ldarg_0);
 
-            c.EmitDelegate<Func<Player, bool>>((self) => ArtiParryPressed(self, true));
+            c.EmitDelegate<Func<Player, bool>>((self) => ArtiParryPressed(self));
 
             c.Emit(OpCodes.Brtrue, afterParryInput);
             c.Emit(OpCodes.Br, afterParry);

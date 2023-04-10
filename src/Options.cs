@@ -14,7 +14,7 @@ namespace RebindEverything
         #region Options
 
         public static Configurable<bool> artiJumpInput = instance.config.Bind("artiJumpInput", true, new ConfigurableInfo(
-            "When checked, pressing either Arti Jump or Arti Parry will cause a jump input, mimick the original binding's behavior.",
+            "When checked, pressing either Arti Jump or Arti Parry will cause a jump input, mimicking the original binding's behavior.",
             null, "", "Arti Jump Input?"));
 
         #endregion
