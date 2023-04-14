@@ -4,15 +4,8 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RWCustom;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Media;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using UnityEngine;
-using static MonoMod.InlineRT.MonoModRule;
-using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
-using Random = UnityEngine.Random;
 
 namespace RebindEverything
 {
@@ -135,14 +128,15 @@ namespace RebindEverything
         private static bool ArtiJumpPressed(Player self)
         {
             bool isCustomInput = IsArtiJumpCustomInput(self);
-            bool isParryOverride = IsArtiParryCustomInput(self) && self.input[0].y < 0;
+            bool isParryOverride = ArtiJump.CurrentBinding(self.playerState.playerNumber) == ArtiParry.CurrentBinding(self.playerState.playerNumber) && self.input[0].y < 0 && self.bodyMode != Player.BodyModeIndex.ZeroG;
 
-            bool flag = self.wantToJump > 0 && self.input[0].pckp;
             bool flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
-
 
             if (isCustomInput)
                 return self.JustPressed(ArtiJump) && !self.pyroJumpped && self.canJump <= 0 && !flag2 && !isParryOverride;
+
+
+            bool flag = self.wantToJump > 0 && self.input[0].pckp;
 
             return flag && !self.pyroJumpped && self.canJump <= 0 && !flag2 && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
         }
@@ -286,14 +280,14 @@ namespace RebindEverything
                 bool isParryOverride = IsArtiParryCustomInput(self) && self.input[0].y < 0;
 
 
-                bool artiJumpInput = IsArtiJumpCustomInput(self) && self.IsPressed(ArtiJump) && self.canJump <= 0 && !flag2 && self.bodyMode == Player.BodyModeIndex.Default && !isParryOverride;
+                bool artiJumpInput = IsArtiJumpCustomInput(self) && self.IsPressed(ArtiJump) && self.canJump <= 0 && !flag2 && self.bodyMode == Player.BodyModeIndex.Default && self.gravity != 0.0f && !isParryOverride;
 
                 if (artiJumpInput) 
                     self.input[0].jmp = true;
 
 
 
-                bool artiParryInput = IsArtiParryCustomInput(self) && self.IsPressed(ArtiParry) && !self.submerged && !flag2;
+                bool artiParryInput = IsArtiParryCustomInput(self) && self.IsPressed(ArtiParry) && !self.submerged && !flag2 && self.gravity > 0.0f;
 
                 if (!artiJumpInput && artiParryInput)
                     self.input[0].y = -1;
