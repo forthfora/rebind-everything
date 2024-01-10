@@ -617,7 +617,7 @@ internal static partial class Hooks
 
             if (!CraftPressed(self)) return;
 
-            if (ModManager.MSC && (self.FreeHand() == -1 || self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer) && CustomGraspsCanBeCrafted(self))
+            if (ModManager.MSC && CustomGraspsCanBeCrafted(self))
             {
                 self.craftingObject = true;
                 playerModule.IsCrafting = true;
@@ -668,12 +668,12 @@ internal static partial class Hooks
 
     private static bool CustomGraspsCanBeCrafted(Player self)
     {
-        if ((!(self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer) || !(self.CraftingResults() != null)) && (!(self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Gourmand) || !(self.CraftingResults() != null)))
+        bool artiCraft = self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer && self.CraftingResults() != null;
+        bool gourmandCraft = self.SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Gourmand && self.CraftingResults() != null;
+        
+        if (!artiCraft && !gourmandCraft)
         {
-            if (ModManager.Expedition && Custom.rainWorld.ExpeditionMode && ExpeditionGame.activeUnlocks.Contains("unl-crafting"))
-                return self.CraftingResults() != null;
-            
-            return false;
+            return ModManager.Expedition && Custom.rainWorld.ExpeditionMode && ExpeditionGame.activeUnlocks.Contains("unl-crafting") && self.CraftingResults() != null;
         }
 
         return true;
