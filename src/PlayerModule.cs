@@ -1,14 +1,12 @@
 ﻿
+namespace RebindEverything;
 
-namespace RebindEverything
+internal class PlayerModule
 {
-    internal class PlayerModule
-    {
-        public bool wasMakeSpearInputRegistered = false;
+    public bool WasMakeSpearInputRegistered { get; set; } = false;
 
-        public bool hadASlug = false;
-        public bool canTakeSlugOffBack = false;
+    public bool HadASlug { get; set; } = false;
+    public bool CanTakeSlugOffBack { get; set; } = false;
 
-        public bool isCrafting = false;
-    }
+    public bool IsCrafting { get; set; } = false;
 }
