@@ -13,11 +13,10 @@ public static class Rebind_Hooks_Saint
     // Ascend, Aim Ascend & Tongue
     private static void Player_ClassMechanicsSaint(On.Player.orig_ClassMechanicsSaint orig, Player self)
     {
-        var wasWantToJump = self.wantToJump;
-        var wasPckpInput = self.input[0].pckp;
-        var wasThrwInput = self.input[0].thrw;
-        var wasJmpInput = self.input[0].jmp;
+        var wasInput0 = self.input[0];
+        var wasInput1 = self.input[1];
 
+        var wasWantToJump = self.wantToJump;
         var wasAscension = self.monkAscension;
 
         if (self.IsAscendCustomInput())
@@ -41,6 +40,12 @@ public static class Rebind_Hooks_Saint
         if (self.IsGrappleCustomInput())
         {
             self.input[0].jmp = self.JustPressed(Input_Helpers.Grapple);
+
+            if (self.JustPressed(Input_Helpers.Grapple))
+            {
+                self.input[1].jmp = false;
+                self.input[0].pckp = false;
+            }
         }
 
         orig(self);
@@ -50,9 +55,8 @@ public static class Rebind_Hooks_Saint
             self.wantToJump = wasWantToJump;
         }
 
-        self.input[0].pckp = wasPckpInput;
-        self.input[0].thrw = wasThrwInput;
-        self.input[0].jmp = wasJmpInput;
+        self.input[0] = wasInput0;
+        self.input[1] = wasInput1;
     }
 
     // Tongue

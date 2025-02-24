@@ -62,47 +62,47 @@ internal static class Input_Helpers
     // Whether the custom input should be used
     public static bool IsArtiJumpCustomInput(this Player self)
     {
-        return self.IsKeyBound(ArtiJump) && self.controller == null;
+        return self.IsKeyBound(ArtiJump) && self.controller is null;
     }
 
     public static bool IsArtiParryCustomInput(this Player self)
     {
-        return self.IsKeyBound(ArtiParry) && !ArtiParry.HideConfig && self.controller == null;
+        return self.IsKeyBound(ArtiParry) && !ArtiParry.HideConfig && self.controller is null;
     }
 
     public static bool IsBackSpearCustomInput(this Player self)
     {
-        return self.IsKeyBound(BackSpear) && !BackSpear.HideConfig && self.controller == null;
+        return self.IsKeyBound(BackSpear) && !BackSpear.HideConfig && self.controller is null;
     }
 
     public static bool IsBackSlugCustomInput(this Player self)
     {
-        return self.IsKeyBound(BackSlug) && !BackSlug.HideConfig && self.controller == null;
+        return self.IsKeyBound(BackSlug) && !BackSlug.HideConfig && self.controller is null;
     }
 
     public static bool IsCraftCustomInput(this Player self)
     {
-        return self.IsKeyBound(Craft) && !Craft.HideConfig && self.controller == null;
+        return self.IsKeyBound(Craft) && !Craft.HideConfig && self.controller is null;
     }
 
     public static bool IsMakeSpearCustomInput(this Player self)
     {
-        return self.IsKeyBound(MakeSpear) && !MakeSpear.HideConfig && self.controller == null;
+        return self.IsKeyBound(MakeSpear) && !MakeSpear.HideConfig && self.controller is null;
     }
 
     public static bool IsAscendCustomInput(this Player self)
     {
-        return self.IsKeyBound(Ascend) && !Ascend.HideConfig && self.controller == null;
+        return self.IsKeyBound(Ascend) && !Ascend.HideConfig && self.controller is null;
     }
 
     public static bool IsAimAscendCustomInput(this Player self)
     {
-        return self.IsKeyBound(AimAscend) && !AimAscend.HideConfig && self.controller == null;
+        return self.IsKeyBound(AimAscend) && !AimAscend.HideConfig && self.controller is null;
     }
 
     public static bool IsGrappleCustomInput(this Player self)
     {
-        return self.IsKeyBound(Grapple) && !Grapple.HideConfig && self.controller == null;
+        return self.IsKeyBound(Grapple) && !Grapple.HideConfig && self.controller is null;
     }
 
 
@@ -231,7 +231,7 @@ internal static class Input_Helpers
         for (var i = 0; i < self.grasps.Length; i++)
         {
             var grasp = self.grasps[i];
-            if (grasp == null)
+            if (grasp is null)
             {
                 continue;
             }
@@ -250,12 +250,8 @@ internal static class Input_Helpers
         for (var i = 0; i < self.grasps.Length; i++)
         {
             var grasp = self.grasps[i];
-            if (grasp == null)
-            {
-                continue;
-            }
 
-            if (grasp.grabbed is not Creature creature)
+            if (grasp?.grabbed is not Creature creature)
             {
                 continue;
             }

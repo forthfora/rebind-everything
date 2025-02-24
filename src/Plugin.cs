@@ -8,7 +8,6 @@ using System.Security;
 [module: UnverifiableCode]
 #pragma warning restore CS0618 // Type or member is obsolete
 
-
 namespace RebindEverything;
 
 [BepInPlugin(ModId, ModId, "1.1.0")]

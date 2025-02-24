@@ -107,7 +107,7 @@ public static class Rebind_Hooks_Back
 
         c.EmitDelegate<Action<int, Player>>((grasps, self) =>
         {
-            if (self.slugOnBack == null)
+            if (self.slugOnBack is null)
             {
                 return;
             }
@@ -145,7 +145,7 @@ public static class Rebind_Hooks_Back
             {
                 for (var i = 0; i < 2; i++)
                 {
-                    if (self.grasps[i] == null)
+                    if (self.grasps[i] is null)
                     {
                         continue;
                     }
@@ -182,7 +182,7 @@ public static class Rebind_Hooks_Back
 
         c.EmitDelegate<Action<int, Player>>((grasps, self) =>
         {
-            if (self.spearOnBack == null)
+            if (self.spearOnBack is null)
             {
                 return;
             }
@@ -199,11 +199,13 @@ public static class Rebind_Hooks_Back
             {
                 for (var m = 0; m < 2; m++)
                 {
-                    if (self.grasps[m] != null && self.grasps[m].grabbed is Spear)
+                    if (self.grasps[m] is null || self.grasps[m].grabbed is not Spear)
                     {
-                        holdingSpear = true;
-                        break;
+                        continue;
                     }
+
+                    holdingSpear = true;
+                    break;
                 }
             }
 

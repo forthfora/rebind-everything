@@ -34,7 +34,7 @@ public static class Rebind_Hooks_Spearmaster
         });
 
         // Retraction
-        if (!c.TryGotoNext(MoveType.Before,
+        if (!c.TryGotoNext(MoveType.After,
                 x => x.MatchLdarg(0),
                 x => x.MatchCallOrCallvirt<Player>("get_input"),
                 x => x.MatchLdcI4(0),
@@ -44,8 +44,8 @@ public static class Rebind_Hooks_Spearmaster
             throw new Exception("Goto Failed");
         }
 
-        // TODO: REMOVE IT
-        c.RemoveRange(5);
+        // Ignore the original input check
+        c.Emit(OpCodes.Pop);
 
         c.Emit(OpCodes.Ldarg_0);
         c.EmitDelegate<Func<Player, bool>>(self => self.MakeSpearPressed());
