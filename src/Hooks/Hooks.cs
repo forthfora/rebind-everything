@@ -42,7 +42,7 @@ public static class Hooks
 
             if (mod is null)
             {
-                throw new Exception($"Could not find mod ID!");
+                throw new Exception("Could not find mod ID!");
             }
 
             Plugin.ModName = mod.name;

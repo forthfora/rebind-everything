@@ -117,13 +117,13 @@ internal static class Input_Helpers
 
         if (isCustomInput)
         {
-            return self.JustPressed(ArtiJump) && !self.pyroJumpped && self.canJump <= 0 && !flag2 && !isParryOverride;
+            return self.JustPressed(ArtiJump) && self is { pyroJumpped: false, canJump: <= 0 } && !flag2 && !isParryOverride;
         }
 
 
         var flag = self.wantToJump > 0 && self.input[0].pckp;
 
-        return flag && !self.pyroJumpped && self.canJump <= 0 && !flag2 && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
+        return flag && self is { pyroJumpped: false, canJump: <= 0 } && !flag2 && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
     }
 
     public static bool ArtiParryPressed(this Player self)
@@ -186,23 +186,6 @@ internal static class Input_Helpers
         }
 
         return self.input[0].pckp;
-    }
-
-    public static bool AscendPressed(this Player self, bool isActivating)
-    {
-        var isCustomInput = IsAscendCustomInput(self);
-
-        if (isCustomInput)
-        {
-            return self.IsPressed(Ascend);
-        }
-
-        if (isActivating)
-        {
-            return self.wantToJump > 0 && self.input[0].jmp;
-        }
-
-        return self.wantToJump > 0;
     }
 
     public static bool AimAscendPressed(this Player self)

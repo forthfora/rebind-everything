@@ -327,7 +327,7 @@ public static class Rebind_Hooks_Back
 
         c.Emit(OpCodes.Pop);
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Func<Player.SlugOnBack, bool>>((self) => self.owner.BackSlugPressed());
+        c.EmitDelegate<Func<Player.SlugOnBack, bool>>(self => self.owner.BackSlugPressed());
     }
 
     private static void SpearOnBack_UpdateIL(ILContext il)
@@ -342,6 +342,6 @@ public static class Rebind_Hooks_Back
 
         c.Emit(OpCodes.Pop);
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Func<Player.SpearOnBack, bool>>((self) => self.owner.BackSpearPressed());
+        c.EmitDelegate<Func<Player.SpearOnBack, bool>>(self => self.owner.BackSpearPressed());
     }
 }

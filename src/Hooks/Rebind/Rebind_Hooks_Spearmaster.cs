@@ -26,53 +26,61 @@ public static class Rebind_Hooks_Spearmaster
         var afterExtractionDest = c.DefineLabel();
 
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Action<Player>>((player) =>
+        c.EmitDelegate<Action<Player>>(player =>
         {
             var module = player.GetModule();
 
             module.WasMakeSpearInputRegistered = false;
         });
 
-
-
         // Retraction
-        c.GotoNext(MoveType.Before,
-            x => x.MatchLdarg(0),
-            x => x.MatchCallOrCallvirt<Player>("get_input"),
-            x => x.MatchLdcI4(0),
-            x => x.MatchLdelema<Player.InputPackage>(),
-            x => x.MatchLdfld<Player.InputPackage>(nameof(Player.InputPackage.pckp)));
+        if (!c.TryGotoNext(MoveType.Before,
+                x => x.MatchLdarg(0),
+                x => x.MatchCallOrCallvirt<Player>("get_input"),
+                x => x.MatchLdcI4(0),
+                x => x.MatchLdelema<Player.InputPackage>(),
+                x => x.MatchLdfld<Player.InputPackage>(nameof(Player.InputPackage.pckp))))
+        {
+            throw new Exception("Goto Failed");
+        }
 
         // TODO: REMOVE IT
         c.RemoveRange(5);
 
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Func<Player, bool>>((self) => self.MakeSpearPressed());
-
-
+        c.EmitDelegate<Func<Player, bool>>(self => self.MakeSpearPressed());
 
         // Move closer to target
-        c.GotoNext(MoveType.After,
-            x => x.MatchCallOrCallvirt<Player>(nameof(Player.PickupPressed)));
+        if (!c.TryGotoNext(MoveType.After,
+            x => x.MatchCallOrCallvirt<Player>(nameof(Player.PickupPressed))))
+        {
+            throw new Exception("Goto Failed");
+        }
 
         // Get Destination
-        c.GotoNext(MoveType.After,
+        if (!c.TryGotoNext(MoveType.After,
             x => x.MatchLdloc(3),
             x => x.MatchLdcI4(-1),
-            x => x.MatchBle(out extractionDest));
+            x => x.MatchBle(out extractionDest)))
+        {
+            throw new Exception("Goto Failed");
+        }
 
 
         // Extraction
-        c.GotoNext(MoveType.After,
+        if (!c.TryGotoNext(MoveType.After,
             x => x.MatchLdarg(0),
             x => x.MatchCallOrCallvirt<Player>("get_input"),
             x => x.MatchLdcI4(0),
             x => x.MatchLdelema<Player.InputPackage>(),
             x => x.MatchLdfld<Player.InputPackage>(nameof(Player.InputPackage.y)),
-            x => x.MatchBrtrue(out afterExtractionDest));
+            x => x.MatchBrtrue(out afterExtractionDest)))
+        {
+            throw new Exception("Goto Failed");
+        }
 
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Func<Player, bool>>((self) =>
+        c.EmitDelegate<Func<Player, bool>>(self =>
         {
             var module = self.GetModule();
 
@@ -86,15 +94,18 @@ public static class Rebind_Hooks_Spearmaster
 
 
         // Move just before PickupPressed checks
-        c.GotoNext(MoveType.After,
-            x => x.MatchStfld<Player>(nameof(Player.wantToThrow)));
+        if (!c.TryGotoNext(MoveType.After,
+            x => x.MatchStfld<Player>(nameof(Player.wantToThrow))))
+        {
+            throw new Exception("Goto Failed");
+        }
 
         c.Index++;
         c.Emit(OpCodes.Pop);
 
         // Branch back to check extraction
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Func<Player, bool>>((player) =>
+        c.EmitDelegate<Func<Player, bool>>(player =>
         {
             var module = player.GetModule();
 

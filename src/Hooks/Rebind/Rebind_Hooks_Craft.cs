@@ -32,7 +32,7 @@ public static class Rebind_Hooks_Craft
 
 
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Action<Player>>((self) =>
+        c.EmitDelegate<Action<Player>>(self =>
         {
             var module = self.GetModule();
 
