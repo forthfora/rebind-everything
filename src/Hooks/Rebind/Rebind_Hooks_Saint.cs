@@ -39,9 +39,11 @@ public static class Rebind_Hooks_Saint
 
         if (self.IsGrappleCustomInput())
         {
-            self.input[0].jmp = self.JustPressed(Input_Helpers.Grapple);
+            var grappleJustPressed = self.JustPressed(Input_Helpers.Grapple) || Input_Helpers.MouseButtonJustPressed(ModOptions.MouseButtonGrapple.Value);
 
-            if (self.JustPressed(Input_Helpers.Grapple))
+            self.input[0].jmp = grappleJustPressed;
+
+            if (grappleJustPressed)
             {
                 self.input[1].jmp = false;
                 self.input[0].pckp = false;
@@ -67,7 +69,7 @@ public static class Rebind_Hooks_Saint
 
         if (self.IsGrappleCustomInput())
         {
-            var grappleInput = self.JustPressed(Input_Helpers.Grapple);
+            var grappleInput = self.JustPressed(Input_Helpers.Grapple) || Input_Helpers.MouseButtonJustPressed(ModOptions.MouseButtonGrapple.Value);
 
             self.input[0].jmp = grappleInput;
             self.input[1].jmp = false;
