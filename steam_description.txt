@@ -1,8 +1,8 @@
 [h1]Provides options for rebinding all Slugcat abilities, via Improved Input Config![/h1]
 
-[h1]Instead of through the Remix config menu, configure this mod via the normal Input Settings under Options![/h1]
+[h3]Instead of through the Remix config menu, configure this mod via the normal Input Settings under Options.[/h3]
 
-[b]Provides options to rebind all of the following:[/b]
+[h3]Provides options to rebind all of the following:[/h3]
 [list]
     [*]Back Spears
     [*]Back Slugs
@@ -15,9 +15,7 @@
     [*]Grappling (Tongue & Grapple Worm)
 [/list]
 
-[b]For any inputs left unbound, the default behavior is used![b]
+[h3]For any inputs left unbound, the default behavior is used[/h3]
 
-[u][b]Improved Input Config may show a warning if multiple bindings share the same key, but otherwise the rebinds should still work perfectly fine in this case![/b][/u]
-
-[b](main thumbnail by my sister, alternate art by Scavenger#8664)[/b]
-[b][u]Source: https://github.com/forthbridge/rebind-everything[/u][/b]
+[b](thumbnail by Kimi)[/b]
+[b][u]Source: https://github.com/forthfora/rebind-everything[/u][/b]

@@ -17,6 +17,8 @@ public static class Hooks
         Rebind_Hooks_Artificer.ApplyHooks();
         Rebind_Hooks_Saint.ApplyHooks();
         Rebind_Hooks_Spearmaster.ApplyHooks();
+
+        Input_Hooks.ApplyHooks();
     }
 
     public static void ApplyInit()
@@ -38,7 +40,7 @@ public static class Hooks
 
             IsInit = true;
 
-            var mod = ModManager.ActiveMods.FirstOrDefault(mod => mod.id == Plugin.ModId);
+            var mod = ModManager.ActiveMods.FirstOrDefault(mod => mod.id == Plugin.MOD_ID);
 
             if (mod is null)
             {

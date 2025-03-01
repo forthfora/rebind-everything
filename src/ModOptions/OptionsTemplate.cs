@@ -15,7 +15,7 @@ public abstract class OptionsTemplate : OptionInterface
     private const float CHECKBOX_SIZE = 60.0f;
 
     private const int DRAGGER_COUNT = 2;
-    private const float DRAGGER_SIZE = 60.0f;
+    private const float DRAGGER_SIZE = 50.0f;
 
     private float CheckBoxWithSpacing => CHECKBOX_SIZE + 0.25f * SPACING;
     private float DraggerWithSpacing => DRAGGER_SIZE + 0.25f * SPACING;

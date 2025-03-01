@@ -77,12 +77,7 @@ public static class Rebind_Hooks_Craft
 
             var module = self.GetModule();
 
-            if (module.IsCrafting)
-            {
-                return true;
-            }
-
-            return flag3;
+            return module.IsCrafting || flag3;
         });
         c.Emit(OpCodes.Stloc_1);
 

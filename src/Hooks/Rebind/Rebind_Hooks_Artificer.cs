@@ -51,7 +51,7 @@ public static class Rebind_Hooks_Artificer
         var isParryOverride = self.IsArtiParryCustomInput() && self.input[0].y < 0;
 
 
-        var artiJumpInput = self.IsArtiJumpCustomInput() && self.IsPressed(Input_Helpers.ArtiJump) && self.canJump <= 0 && !eatFlag && self.bodyMode == Player.BodyModeIndex.Default && self.gravity != 0.0f && !isParryOverride;
+        var artiJumpInput = self.IsArtiJumpCustomInput() && (Input_Helpers.MouseButtonPressed(ModOptions.MouseButtonArtiJump.Value) || self.IsPressed(Input_Helpers.ArtiJump)) && self.canJump <= 0 && !eatFlag && self.bodyMode == Player.BodyModeIndex.Default && self.gravity != 0.0f && !isParryOverride;
 
         if (artiJumpInput)
         {
@@ -59,7 +59,7 @@ public static class Rebind_Hooks_Artificer
         }
 
 
-        var artiParryInput = self.IsArtiParryCustomInput() && self.IsPressed(Input_Helpers.ArtiParry) && !self.submerged && !eatFlag && self.gravity > 0.0f;
+        var artiParryInput = self.IsArtiParryCustomInput() && (Input_Helpers.MouseButtonPressed(ModOptions.MouseButtonArtiParry.Value) || self.IsPressed(Input_Helpers.ArtiParry)) && !self.submerged && !eatFlag && self.gravity > 0.0f;
 
         if (!artiJumpInput && artiParryInput)
         {

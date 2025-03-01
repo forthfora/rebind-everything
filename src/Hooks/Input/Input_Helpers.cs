@@ -1,9 +1,10 @@
-﻿using ImprovedInput;
+﻿using System.Collections.Generic;
+using ImprovedInput;
 using UnityEngine;
 
 namespace RebindEverything;
 
-internal static class Input_Helpers
+public static class Input_Helpers
 {
     public static PlayerKeybind BackSpear { get; } = PlayerKeybind.Register("rebindeverything:backspear", "Rebind Everything", "Back Spear", KeyCode.None, KeyCode.None);
     public static PlayerKeybind BackSlug { get; } = PlayerKeybind.Register("rebindeverything:backslug", "Rebind Everything", "Back Slug", KeyCode.None, KeyCode.None);
@@ -48,7 +49,7 @@ internal static class Input_Helpers
 
     public static void HideIrrelevantConfigs()
     {
-        BackSlug.HideConfig = !ModManager.MSC && !ModManager.JollyCoop;
+        BackSlug.HideConfig = !ModManager.MSC && !ModManager.JollyCoop && !MachineConnector.IsThisModActive("henpemaz_rainmeadow");
 
         Craft.HideConfig = !ModManager.MSC;
         ArtiJump.HideConfig = !ModManager.MSC || MachineConnector.IsThisModActive("danizk0.rebindartificer");
@@ -62,47 +63,47 @@ internal static class Input_Helpers
     // Whether the custom input should be used
     public static bool IsArtiJumpCustomInput(this Player self)
     {
-        return self.IsKeyBound(ArtiJump) && self.controller is null;
+        return (ModOptions.MouseButtonArtiJump.Value != 0 || self.IsKeyBound(ArtiJump)) && self.controller is null;
     }
 
     public static bool IsArtiParryCustomInput(this Player self)
     {
-        return self.IsKeyBound(ArtiParry) && !ArtiParry.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonArtiParry.Value != 0 || self.IsKeyBound(ArtiParry)) && !ArtiParry.HideConfig && self.controller is null;
     }
 
     public static bool IsBackSpearCustomInput(this Player self)
     {
-        return self.IsKeyBound(BackSpear) && !BackSpear.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonBackSpear.Value != 0 || self.IsKeyBound(BackSpear)) && !BackSpear.HideConfig && self.controller is null;
     }
 
     public static bool IsBackSlugCustomInput(this Player self)
     {
-        return self.IsKeyBound(BackSlug) && !BackSlug.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonBackSlug.Value != 0 || self.IsKeyBound(BackSlug)) && !BackSlug.HideConfig && self.controller is null;
     }
 
     public static bool IsCraftCustomInput(this Player self)
     {
-        return self.IsKeyBound(Craft) && !Craft.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonCraft.Value != 0 || self.IsKeyBound(Craft)) && !Craft.HideConfig && self.controller is null;
     }
 
     public static bool IsMakeSpearCustomInput(this Player self)
     {
-        return self.IsKeyBound(MakeSpear) && !MakeSpear.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonMakeSpear.Value != 0 || self.IsKeyBound(MakeSpear)) && !MakeSpear.HideConfig && self.controller is null;
     }
 
     public static bool IsAscendCustomInput(this Player self)
     {
-        return self.IsKeyBound(Ascend) && !Ascend.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonAscend.Value != 0 || self.IsKeyBound(Ascend)) && !Ascend.HideConfig && self.controller is null;
     }
 
     public static bool IsAimAscendCustomInput(this Player self)
     {
-        return self.IsKeyBound(AimAscend) && !AimAscend.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonAimAscend.Value != 0 || self.IsKeyBound(AimAscend)) && !AimAscend.HideConfig && self.controller is null;
     }
 
     public static bool IsGrappleCustomInput(this Player self)
     {
-        return self.IsKeyBound(Grapple) && !Grapple.HideConfig && self.controller is null;
+        return (ModOptions.MouseButtonGrapple.Value != 0 || self.IsKeyBound(Grapple)) && !Grapple.HideConfig && self.controller is null;
     }
 
 
@@ -113,17 +114,16 @@ internal static class Input_Helpers
         var isCustomInput = IsArtiJumpCustomInput(self);
         var isParryOverride = ArtiJump.CurrentBinding(self.playerState.playerNumber) == ArtiParry.CurrentBinding(self.playerState.playerNumber) && self.input[0].y < 0 && self.bodyMode != Player.BodyModeIndex.ZeroG;
 
-        var flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
+        var eatFlag = self.eatMeat >= 20 || self.maulTimer >= 15;
 
         if (isCustomInput)
         {
-            return self.JustPressed(ArtiJump) && self is { pyroJumpped: false, canJump: <= 0 } && !flag2 && !isParryOverride;
+            return (MouseButtonJustPressed(ModOptions.MouseButtonArtiJump.Value) || self.JustPressed(ArtiJump)) && self is { pyroJumpped: false, canJump: <= 0 } && !eatFlag && !isParryOverride;
         }
 
+        var inputFlag = self.wantToJump > 0 && self.input[0].pckp;
 
-        var flag = self.wantToJump > 0 && self.input[0].pckp;
-
-        return flag && self is { pyroJumpped: false, canJump: <= 0 } && !flag2 && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
+        return inputFlag && self is { pyroJumpped: false, canJump: <= 0 } && !eatFlag && (self.input[0].y >= 0 || (self.input[0].y < 0 && (self.bodyMode == Player.BodyModeIndex.ZeroG || self.gravity <= 0.1f)));
     }
 
     public static bool ArtiParryPressed(this Player self)
@@ -133,10 +133,9 @@ internal static class Input_Helpers
         var flag = self.wantToJump > 0 && self.input[0].pckp;
         var flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
 
-
         if (isCustomInput)
         {
-            return self.JustPressed(ArtiParry) && !self.submerged && !flag2;
+            return (MouseButtonJustPressed(ModOptions.MouseButtonArtiParry.Value) || self.JustPressed(ArtiParry)) && !self.submerged && !flag2;
         }
 
         return flag && !self.submerged && !flag2 && (self.input[0].y < 0 || self.bodyMode == Player.BodyModeIndex.Crawl) && (self.canJump > 0 || self.input[0].y < 0);
@@ -153,7 +152,7 @@ internal static class Input_Helpers
 
         if (isCustomInput)
         {
-            return self.IsPressed(BackSpear);
+            return MouseButtonPressed(ModOptions.MouseButtonBackSpear.Value) || self.IsPressed(BackSpear);
         }
 
         return self.input[0].pckp;
@@ -170,7 +169,7 @@ internal static class Input_Helpers
 
         if (isCustomInput)
         {
-            return self.IsPressed(BackSlug);
+            return MouseButtonPressed(ModOptions.MouseButtonBackSlug.Value) || self.IsPressed(BackSlug);
         }
 
         return self.input[0].pckp;
@@ -182,7 +181,7 @@ internal static class Input_Helpers
 
         if (isCustomInput)
         {
-            return self.IsPressed(Craft);
+            return MouseButtonPressed(ModOptions.MouseButtonCraft.Value) || self.IsPressed(Craft);
         }
 
         return self.input[0].pckp;
@@ -194,7 +193,7 @@ internal static class Input_Helpers
 
         if (isCustomInput)
         {
-            return self.IsPressed(AimAscend);
+            return MouseButtonPressed(ModOptions.MouseButtonAimAscend.Value) || self.IsPressed(AimAscend);
         }
 
         return self.input[0].thrw;
@@ -206,7 +205,7 @@ internal static class Input_Helpers
 
         if (isCustomInput)
         {
-            return self.IsPressed(Grapple);
+            return MouseButtonPressed(ModOptions.MouseButtonGrapple.Value) || self.IsPressed(Grapple);
         }
 
         return self.input[0].jmp;
@@ -218,14 +217,14 @@ internal static class Input_Helpers
 
         if (isCustomInput)
         {
-            return self.IsPressed(MakeSpear);
+            return MouseButtonPressed(ModOptions.MouseButtonMakeSpear.Value) || self.IsPressed(MakeSpear);
         }
 
         return self.input[0].pckp;
     }
 
 
-
+    // Back Spear & Slug Helpers
     public static int PlayerGraspsHas(this Player self, AbstractPhysicalObject.AbstractObjectType type)
     {
         for (var i = 0; i < self.grasps.Length; i++)
@@ -263,5 +262,39 @@ internal static class Input_Helpers
         }
 
         return -1;
+    }
+
+
+    // Mouse Button Support
+    public static int MaxMouseButtonIndex => 6;
+    public static Dictionary<int, bool> MouseButtonIndexToWasInput { get; } = [];
+
+    public static bool MouseButtonJustPressed(int buttonNumber)
+    {
+        if (buttonNumber == 0)
+        {
+            return false;
+        }
+
+        var buttonIndex = buttonNumber - 1;
+
+        var hasInput = Input.GetMouseButton(buttonIndex);
+        var wasInput = MouseButtonIndexToWasInput.TryGetValue(buttonIndex, out var input) && input;
+
+        var justPressed = hasInput && !wasInput;
+
+        return justPressed;
+    }
+
+    public static bool MouseButtonPressed(int buttonNumber)
+    {
+        if (buttonNumber == 0)
+        {
+            return false;
+        }
+
+        var buttonIndex = buttonNumber - 1;
+
+        return Input.GetMouseButton(buttonIndex);
     }
 }
