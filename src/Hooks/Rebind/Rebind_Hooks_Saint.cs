@@ -21,7 +21,7 @@ public static class Rebind_Hooks_Saint
 
         if (self.IsAscendCustomInput())
         {
-            var ascensionInput = self.JustPressed(Input_Helpers.Ascend);
+            var ascensionInput = self.JustPressed(Input_Helpers.Ascend) || Input_Helpers.MouseButtonJustPressed(ModOptions.MouseButtonAscend.Value);
 
             self.wantToJump = ascensionInput ? 1 : 0;
             self.input[0].pckp = ascensionInput && !self.monkAscension;

@@ -1,0 +1,18 @@
+{
+  "Title": "Rebind Everything",
+  "Description": "Provides options for rebinding all Slugcat abilities, via Improved Input Config!\u003CLINE\u003E\u003CLINE\u003EInstead of through the Remix config menu, configure this mod\u003CLINE\u003Evia the normal input settings under options.",
+  "ID": "rebindeverything",
+  "Version": "1.1.0",
+  "TargetGameVersion": "v1.9.06",
+  "Requirements": "improved-input-config",
+  "RequirementNames": "Improved Input Config",
+  "Authors": "forthfora",
+  "Visibility": "Public",
+  "Tags": [
+    "Game Mechanics",
+    "Accessibility"
+  ],
+  "WorkshopID": 2954686369,
+  "UploadFilesOnly": true,
+  "UploadThumbnail": true
+}
