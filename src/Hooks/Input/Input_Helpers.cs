@@ -63,47 +63,47 @@ public static class Input_Helpers
     // Whether the custom input should be used
     public static bool IsArtiJumpCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonArtiJump.Value != 0 || self.IsKeyBound(ArtiJump)) && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonArtiJump.Value != 0) || self.IsKeyBound(ArtiJump)) && self.controller is null;
     }
 
     public static bool IsArtiParryCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonArtiParry.Value != 0 || self.IsKeyBound(ArtiParry)) && !ArtiParry.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonArtiParry.Value != 0) || self.IsKeyBound(ArtiParry)) && !ArtiParry.HideConfig && self.controller is null;
     }
 
     public static bool IsBackSpearCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonBackSpear.Value != 0 || self.IsKeyBound(BackSpear)) && !BackSpear.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonBackSpear.Value != 0) || self.IsKeyBound(BackSpear)) && !BackSpear.HideConfig && self.controller is null;
     }
 
     public static bool IsBackSlugCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonBackSlug.Value != 0 || self.IsKeyBound(BackSlug)) && !BackSlug.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonBackSlug.Value != 0) || self.IsKeyBound(BackSlug)) && !BackSlug.HideConfig && self.controller is null;
     }
 
     public static bool IsCraftCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonCraft.Value != 0 || self.IsKeyBound(Craft)) && !Craft.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonCraft.Value != 0) || self.IsKeyBound(Craft)) && !Craft.HideConfig && self.controller is null;
     }
 
     public static bool IsMakeSpearCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonMakeSpear.Value != 0 || self.IsKeyBound(MakeSpear)) && !MakeSpear.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonMakeSpear.Value != 0) || self.IsKeyBound(MakeSpear)) && !MakeSpear.HideConfig && self.controller is null;
     }
 
     public static bool IsAscendCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonAscend.Value != 0 || self.IsKeyBound(Ascend)) && !Ascend.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonAscend.Value != 0) || self.IsKeyBound(Ascend)) && !Ascend.HideConfig && self.controller is null;
     }
 
     public static bool IsAimAscendCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonAimAscend.Value != 0 || self.IsKeyBound(AimAscend)) && !AimAscend.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonAimAscend.Value != 0) || self.IsKeyBound(AimAscend)) && !AimAscend.HideConfig && self.controller is null;
     }
 
     public static bool IsGrappleCustomInput(this Player self)
     {
-        return (ModOptions.MouseButtonGrapple.Value != 0 || self.IsKeyBound(Grapple)) && !Grapple.HideConfig && self.controller is null;
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonGrapple.Value != 0) || self.IsKeyBound(Grapple)) && !Grapple.HideConfig && self.controller is null;
     }
 
 
@@ -296,5 +296,10 @@ public static class Input_Helpers
         var buttonIndex = buttonNumber - 1;
 
         return Input.GetMouseButton(buttonIndex);
+    }
+
+    public static bool IsKeyboardPlayer(this Player player)
+    {
+        return player.input[0].controllerType == Options.ControlSetup.Preset.KeyboardSinglePlayer;
     }
 }

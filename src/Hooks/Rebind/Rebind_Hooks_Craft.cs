@@ -34,6 +34,11 @@ public static class Rebind_Hooks_Craft
         c.Emit(OpCodes.Ldarg_0);
         c.EmitDelegate<Action<Player>>(self =>
         {
+            if (!self.IsCraftCustomInput())
+            {
+                return;
+            }
+
             var module = self.GetModule();
 
             module.IsCrafting = false;
@@ -112,7 +117,7 @@ public static class Rebind_Hooks_Craft
         }
 
         c.Emit(OpCodes.Ldarg_0);
-        c.EmitDelegate<Func<Player, bool>>(Input_Helpers.IsCraftCustomInput);
+        c.EmitDelegate<Func<Player, bool>>((self) => !self.IsCraftCustomInput());
         c.Emit(OpCodes.And);
     }
 }
