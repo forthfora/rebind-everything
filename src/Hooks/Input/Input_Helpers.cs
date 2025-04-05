@@ -20,6 +20,8 @@ public static class Input_Helpers
 
     public static PlayerKeybind Grapple { get; } = PlayerKeybind.Register("rebindeverything:grapple", "Rebind Everything", "Grapple", KeyCode.None, KeyCode.None);
 
+    public static PlayerKeybind Camo { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Camo", KeyCode.None, KeyCode.None);
+    public static PlayerKeybind Warp { get; } = PlayerKeybind.Register("rebindeverything:warp", "Rebind Everything", "Warp", KeyCode.None, KeyCode.None);
 
     public static void InitInput()
     {
@@ -34,9 +36,12 @@ public static class Input_Helpers
         MakeSpear.Description = "The key held to have Spearmaster make a new spear.";
 
         Ascend.Description = "The key pressed to toggle Saint's ascension mode.";
-        AimAscend.Description = "The key held to move the Saint's ascension reticle around.";
+        AimAscend.Description = "The key held to move the Saint's ascension reticule around.";
 
         Grapple.Description = "Affects Saint's Tongue & Grapple Worms.";
+
+        Camo.Description = "Key pressed to trigger Watcher's camouflage ability.";
+        Warp.Description = "Key pressed to trigger Watcher's warp ability.";
 
 
         BackSpear.HideConflict = k => k == BackSlug;
@@ -56,6 +61,9 @@ public static class Input_Helpers
         MakeSpear.HideConfig = !ModManager.MSC;
         Ascend.HideConfig = !ModManager.MSC;
         AimAscend.HideConfig = !ModManager.MSC;
+
+        Camo.HideConfig = !ModManager.Watcher;
+        Warp.HideConfig = !ModManager.Watcher;
     }
 
 
@@ -103,6 +111,16 @@ public static class Input_Helpers
     public static bool IsGrappleCustomInput(this Player self)
     {
         return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonGrapple.Value != 0) || self.IsKeyBound(Grapple)) && !Grapple.HideConfig && self.controller is null;
+    }
+
+    public static bool IsCamoCustomInput(this Player self)
+    {
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonCamo.Value != 0) || self.IsKeyBound(Camo)) && !Camo.HideConfig && self.controller is null;
+    }
+
+    public static bool IsWarpCustomInput(this Player self)
+    {
+        return ((self.IsKeyboardPlayer() && ModOptions.MouseButtonWarp.Value != 0) || self.IsKeyBound(Warp)) && !Warp.HideConfig && self.controller is null;
     }
 
 
@@ -220,6 +238,30 @@ public static class Input_Helpers
         }
 
         return self.input[0].pckp;
+    }
+
+    public static bool CamoPressed(this Player self)
+    {
+        var isCustomInput = IsCamoCustomInput(self);
+
+        if (isCustomInput)
+        {
+            return MouseButtonPressed(ModOptions.MouseButtonCamo.Value) || self.IsPressed(Camo);
+        }
+
+        return self.input[0].spec;
+    }
+
+    public static bool WarpPressed(this Player self)
+    {
+        var isCustomInput = IsWarpCustomInput(self);
+
+        if (isCustomInput)
+        {
+            return MouseButtonPressed(ModOptions.MouseButtonWarp.Value) || self.IsPressed(Warp);
+        }
+
+        return self.input[0].spec;
     }
 
 
