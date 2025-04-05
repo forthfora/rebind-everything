@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace RebindEverything;
+﻿namespace RebindEverything;
 
 public static class Hooks
 {
@@ -17,6 +14,8 @@ public static class Hooks
         Rebind_Hooks_Artificer.ApplyHooks();
         Rebind_Hooks_Saint.ApplyHooks();
         Rebind_Hooks_Spearmaster.ApplyHooks();
+
+        Rebind_Hooks_Watcher.ApplyHooks();
 
         Input_Hooks.ApplyHooks();
     }

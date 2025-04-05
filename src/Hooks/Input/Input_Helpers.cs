@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ImprovedInput;
+﻿using ImprovedInput;
 using UnityEngine;
 
 namespace RebindEverything;

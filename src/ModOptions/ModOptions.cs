@@ -64,6 +64,12 @@ public class ModOptions : OptionsTemplate
         new ConfigAcceptableRange<int>(0, Input_Helpers.MaxMouseButtonIndex + 1), "",
         "Grapple Mouse Button"));
 
+    public static Configurable<int> MouseButtonWatcher { get; } = Instance.config.Bind(nameof(MouseButtonWatcher), 0, new ConfigurableInfo(
+        "Mouse button index to trigger the action. 0 to disable. Hold and drag up or down to change.",
+        new ConfigAcceptableRange<int>(0, Input_Helpers.MaxMouseButtonIndex + 1), "",
+        "Watcher Mouse Button"));
+
+
     public static int NumberOfTabs => 1;
 
     public override void Initialize()
@@ -130,6 +136,12 @@ public class ModOptions : OptionsTemplate
         }
 
         AddDragger(MouseButtonGrapple);
+
+        if (ModManager.Watcher)
+        {
+            AddDragger(MouseButtonWatcher);
+        }
+
         DrawDraggers(ref Tabs[tabIndex]);
 
 
@@ -168,6 +180,11 @@ public class ModOptions : OptionsTemplate
             if (GetConfigurable(MouseButtonAimAscend, out dragger))
             {
                 dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Saint);
+            }
+
+            if (GetConfigurable(MouseButtonWatcher, out dragger))
+            {
+                dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(Watcher.WatcherEnums.SlugcatStatsName.Watcher);
             }
         }
     }
