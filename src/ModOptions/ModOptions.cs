@@ -1,4 +1,6 @@
 ﻿using Menu.Remix.MixedUI;
+using UnityEngine;
+using Custom = RWCustom.Custom;
 
 namespace RebindEverything;
 
@@ -64,7 +66,17 @@ public class ModOptions : OptionsTemplate
         new ConfigAcceptableRange<int>(0, Input_Helpers.MaxMouseButtonIndex + 1), "",
         "Grapple Mouse Button"));
 
-    public static int NumberOfTabs => 1;
+    public static Configurable<int> MouseButtonCamo { get; } = Instance.config.Bind(nameof(MouseButtonCamo), 0, new ConfigurableInfo(
+        "Mouse button index to trigger the action. 0 to disable. Hold and drag up or down to change.",
+        new ConfigAcceptableRange<int>(0, Input_Helpers.MaxMouseButtonIndex + 1), "",
+        "Camo Mouse Button"));
+
+    public static Configurable<int> MouseButtonWarp { get; } = Instance.config.Bind(nameof(MouseButtonWarp), 0, new ConfigurableInfo(
+        "Mouse button index to trigger the action. 0 to disable. Hold and drag up or down to change.",
+        new ConfigAcceptableRange<int>(0, Input_Helpers.MaxMouseButtonIndex + 1), "",
+        "Warp Mouse Button"));
+
+    public static int NumberOfTabs => 3;
 
     public override void Initialize()
     {
@@ -73,102 +85,134 @@ public class ModOptions : OptionsTemplate
         Tabs = new OpTab[NumberOfTabs];
         var tabIndex = -1;
 
-        AddTab(ref tabIndex, "General");
-
-        AddNewLine();
-        
-        AddTextLabel("To configure the input bindings with this mod, look at the normal Input Settings menu under Options!", FLabelAlignment.Center, true);
-        DrawTextLabels(ref Tabs[tabIndex]);
+        AddGeneralTab(ref tabIndex);
 
         if (ModManager.MSC)
         {
-            AddCheckBox(ArtiJumpInput);
-            DrawCheckBoxes(ref Tabs[tabIndex]);
+            AddMSCTab(ref tabIndex);
         }
 
-        AddNewLine();
-
-        AddMouseButtonConfig(ref tabIndex);
-
-        AddNewLinesUntilEnd();
-        DrawBox(ref Tabs[tabIndex]);
-
-        if (ModManager.MSC)
+        if (ModManager.Watcher)
         {
-            if (GetConfigurable(ArtiJumpInput, out OpCheckBox checkBox))
-            {
-                checkBox.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
-            }
+            AddWatcherTab(ref tabIndex);
         }
     }
 
-    private void AddMouseButtonConfig(ref int tabIndex)
+    private void AddGeneralTab(ref int tabIndex)
     {
+        AddTab(ref tabIndex, "General");
+
+        AddNewLine();
+
+        AddTextLabel("To configure the input bindings with this mod, look at the normal Input Settings menu under Options!", FLabelAlignment.Center, true);
+        DrawTextLabels(ref Tabs[tabIndex]);
+
+        AddNewLine();
+
         AddDragger(MouseButtonBackSpear);
+        DrawDraggers(ref Tabs[tabIndex], 150.0f);
+
+        AddDragger(MouseButtonGrapple);
+        DrawDraggers(ref Tabs[tabIndex], 150.0f);
 
         if (ModManager.MSC || ModManager.JollyCoop || MachineConnector.IsThisModActive("henpemaz_rainmeadow"))
         {
             AddDragger(MouseButtonBackSlug);
+            DrawDraggers(ref Tabs[tabIndex], 150.0f);
         }
 
-        DrawDraggers(ref Tabs[tabIndex]);
-
-        if (ModManager.MSC)
-        {
-            AddDragger(MouseButtonCraft);
-            AddDragger(MouseButtonMakeSpear);
-            DrawDraggers(ref Tabs[tabIndex]);
-
-            AddDragger(MouseButtonArtiJump);
-            AddDragger(MouseButtonArtiParry);
-            DrawDraggers(ref Tabs[tabIndex]);
-
-            AddDragger(MouseButtonAscend);
-            AddDragger(MouseButtonAimAscend);
-            DrawDraggers(ref Tabs[tabIndex]);
-
-        }
-
-        AddDragger(MouseButtonGrapple);
-        DrawDraggers(ref Tabs[tabIndex]);
-
+        AddNewLinesUntilEnd();
+        DrawBox(ref Tabs[tabIndex]);
 
         if (GetConfigurable(MouseButtonBackSpear, out OpDragger dragger))
         {
             dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(SlugcatStats.Name.Red);
         }
+    }
 
-        if (ModManager.MSC)
+    private void AddMSCTab(ref int tabIndex)
+    {
+        AddTab(ref tabIndex, "MSC");
+        Tabs[tabIndex].colorButton = Custom.hexToColor("ceffff");
+
+        AddCheckBox(ArtiJumpInput);
+        DrawCheckBoxes(ref Tabs[tabIndex], offsetX: 150.0f);
+
+        if (GetConfigurable(ArtiJumpInput, out OpCheckBox checkBox))
         {
-            if (GetConfigurable(MouseButtonCraft, out dragger))
-            {
-                dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Gourmand);
-            }
+            checkBox.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
+        }
 
-            if (GetConfigurable(MouseButtonMakeSpear, out dragger))
-            {
-                dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Spear);
-            }
+        AddNewLine();
 
-            if (GetConfigurable(MouseButtonArtiJump, out dragger))
-            {
-                dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
-            }
+        AddDragger(MouseButtonCraft);
+        AddDragger(MouseButtonMakeSpear);
+        DrawDraggers(ref Tabs[tabIndex]);
 
-            if (GetConfigurable(MouseButtonArtiParry, out dragger))
-            {
-                dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
-            }
+        AddDragger(MouseButtonArtiJump);
+        AddDragger(MouseButtonArtiParry);
+        DrawDraggers(ref Tabs[tabIndex]);
 
-            if (GetConfigurable(MouseButtonAscend, out dragger))
-            {
-                dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Saint);
-            }
+        AddDragger(MouseButtonAscend);
+        AddDragger(MouseButtonAimAscend);
+        DrawDraggers(ref Tabs[tabIndex]);
 
-            if (GetConfigurable(MouseButtonAimAscend, out dragger))
-            {
-                dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Saint);
-            }
+        AddNewLinesUntilEnd();
+        DrawBox(ref Tabs[tabIndex]);
+
+        if (GetConfigurable(MouseButtonCraft, out OpDragger dragger))
+        {
+            dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Gourmand);
+        }
+
+        if (GetConfigurable(MouseButtonMakeSpear, out dragger))
+        {
+            dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Spear);
+        }
+
+        if (GetConfigurable(MouseButtonArtiJump, out dragger))
+        {
+            dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
+        }
+
+        if (GetConfigurable(MouseButtonArtiParry, out dragger))
+        {
+            dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
+        }
+
+        if (GetConfigurable(MouseButtonAscend, out dragger))
+        {
+            dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Saint);
+        }
+
+        if (GetConfigurable(MouseButtonAimAscend, out dragger))
+        {
+            dragger.colorText = dragger.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Saint);
+        }
+    }
+
+    private void AddWatcherTab(ref int tabIndex)
+    {
+        var watcherColor = Color.Lerp(PlayerGraphics.DefaultSlugcatColor(Watcher.WatcherEnums.SlugcatStatsName.Watcher), Color.white, 0.1f);
+
+        AddTab(ref tabIndex, "Watcher");
+        Tabs[tabIndex].colorButton = watcherColor;
+
+        AddDragger(MouseButtonCamo);
+        AddDragger(MouseButtonWarp);
+        DrawDraggers(ref Tabs[tabIndex]);
+
+        AddNewLinesUntilEnd();
+        DrawBox(ref Tabs[tabIndex]);
+
+        if (GetConfigurable(MouseButtonCamo, out OpDragger dragger))
+        {
+            dragger.colorText = dragger.colorEdge = watcherColor;
+        }
+
+        if (GetConfigurable(MouseButtonWarp, out dragger))
+        {
+            dragger.colorText = dragger.colorEdge = watcherColor;
         }
     }
 }
