@@ -16,8 +16,6 @@ public static class Hooks
         Rebind_Hooks_Spearmaster.ApplyHooks();
 
         Rebind_Hooks_Watcher.ApplyHooks();
-
-        Input_Hooks.ApplyHooks();
     }
 
     public static void ApplyInit()

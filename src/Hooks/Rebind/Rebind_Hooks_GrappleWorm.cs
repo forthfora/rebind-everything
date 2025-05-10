@@ -70,7 +70,7 @@ public static class Rebind_Hooks_GrappleWorm
                 return input;
             }
 
-            return (self.JustPressed(Input_Helpers.Grapple) || Input_Helpers.MouseButtonJustPressed(ModOptions.MouseButtonGrapple.Value)) && self.canJump < 1;
+            return self.JustPressed(Input_Helpers.Grapple) && self.canJump < 1;
         });
     }
 }
