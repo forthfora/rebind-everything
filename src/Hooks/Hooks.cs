@@ -50,8 +50,6 @@ public static class Hooks
             Plugin.Version = mod.version;
             Plugin.Authors = mod.authors;
 
-            Input_Helpers.InitInput();
-
             ApplyHooks();
         }
         catch (Exception ex)
