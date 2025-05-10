@@ -4,7 +4,7 @@ using UnityEngine;
 namespace RebindEverything;
 
 // Based on the options script from SBCameraScroll by SchuhBaum: https://github.com/SchuhBaum/SBCameraScroll/blob/Rain-World-v1.9/SourceCode/MainModOptions.cs
-public abstract class OptionsTemplate : global::OptionInterface
+public abstract class OptionsTemplate : OptionInterface
 {
     private const float SPACING = 20.0f;
     private const float FONT_HEIGHT = 20.0f;

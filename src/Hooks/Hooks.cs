@@ -16,8 +16,6 @@ public static class Hooks
         Rebind_Hooks_Spearmaster.ApplyHooks();
 
         Rebind_Hooks_Watcher.ApplyHooks();
-
-        Input_Hooks.ApplyHooks();
     }
 
     public static void ApplyInit()
@@ -49,8 +47,6 @@ public static class Hooks
             Plugin.ModName = mod.name;
             Plugin.Version = mod.version;
             Plugin.Authors = mod.authors;
-
-            Input_Helpers.InitInput();
 
             ApplyHooks();
         }

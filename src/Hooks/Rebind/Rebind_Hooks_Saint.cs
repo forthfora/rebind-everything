@@ -21,7 +21,7 @@ public static class Rebind_Hooks_Saint
 
         if (self.IsAscendCustomInput())
         {
-            var ascensionInput = self.JustPressed(Input_Helpers.Ascend) || Input_Helpers.MouseButtonJustPressed(ModOptions.MouseButtonAscend.Value);
+            var ascensionInput = self.JustPressed(Input_Helpers.Ascend);
 
             self.wantToJump = ascensionInput ? 1 : 0;
             self.input[0].pckp = ascensionInput && !self.monkAscension;
@@ -39,7 +39,7 @@ public static class Rebind_Hooks_Saint
 
         if (self.IsGrappleCustomInput())
         {
-            var grappleJustPressed = self.JustPressed(Input_Helpers.Grapple) || Input_Helpers.MouseButtonJustPressed(ModOptions.MouseButtonGrapple.Value);
+            var grappleJustPressed = self.JustPressed(Input_Helpers.Grapple);
 
             self.input[0].jmp = grappleJustPressed;
 
@@ -69,7 +69,7 @@ public static class Rebind_Hooks_Saint
 
         if (self.IsGrappleCustomInput())
         {
-            var grappleInput = self.JustPressed(Input_Helpers.Grapple) || Input_Helpers.MouseButtonJustPressed(ModOptions.MouseButtonGrapple.Value);
+            var grappleInput = self.JustPressed(Input_Helpers.Grapple);
 
             self.input[0].jmp = grappleInput;
             self.input[1].jmp = false;
