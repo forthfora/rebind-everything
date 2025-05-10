@@ -18,7 +18,7 @@ public class ModOptions : OptionsTemplate
         "When checked, pressing either Arti Jump or Arti Parry will cause a jump input, mimicking the original binding's behavior.",
         null, "", "Arti Jump Input?"));
 
-    public static int NumberOfTabs => 3;
+    public static int NumberOfTabs => 1;
 
     public override void Initialize()
     {
