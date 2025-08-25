@@ -10,7 +10,7 @@ using System.Security;
 
 namespace RebindEverything;
 
-[BepInPlugin(MOD_ID, MOD_ID, "1.2.2")]
+[BepInPlugin(MOD_ID, MOD_ID, "1.3.0")]
 internal class Plugin : BaseUnityPlugin
 {
     public const string MOD_ID = "rebindeverything";
