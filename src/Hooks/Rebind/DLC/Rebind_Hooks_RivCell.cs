@@ -11,13 +11,7 @@ public static class Rebind_Hooks_RivCell
 
     private static void EnergyCellOnUpdate(EnergyCell.orig_Update orig, MoreSlugcats.EnergyCell self, bool eu)
     {
-        if (self.grabbedBy[0].grabber is not Player player)
-        {
-            orig(self, eu);
-            return;
-        }
-
-        if (!player.IsRivCellCustomInput())
+        if (self.grabbedBy.Count == 0 || self.grabbedBy[0].grabber is not Player player || !player.IsRivCellCustomInput())
         {
             orig(self, eu);
             return;
