@@ -7,6 +7,7 @@ public static class Input_Helpers
 {
     public static PlayerKeybind BackSpear { get; } = PlayerKeybind.Register("rebindeverything:backspear", "Rebind Everything", "Back Spear", KeyCode.None, KeyCode.None);
     public static PlayerKeybind BackSlug { get; } = PlayerKeybind.Register("rebindeverything:backslug", "Rebind Everything", "Back Slug", KeyCode.None, KeyCode.None);
+    public static PlayerKeybind PoleGrab { get; } = PlayerKeybind.Register("rebindeverything:polegrab", "Rebind Everything", "Pole Grab", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Craft { get; } = PlayerKeybind.Register("rebindeverything:craft", "Rebind Everything", "Craft", KeyCode.None, KeyCode.None);
 
@@ -23,12 +24,12 @@ public static class Input_Helpers
     public static PlayerKeybind Camo { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Camo", KeyCode.None, KeyCode.None);
     public static PlayerKeybind Warp { get; } = PlayerKeybind.Register("rebindeverything:warp", "Rebind Everything", "Warp", KeyCode.None, KeyCode.None);
 
-    public static PlayerKeybind PoleGrab { get; } = PlayerKeybind.Register("rebindeverything:polegrab", "Rebind Everything", "Pole Grab", KeyCode.None, KeyCode.None);
 
     public static void InitInput()
     {
         BackSpear.Description = "The key held to make Hunter either put or retrieve a spear from their back.";
         BackSlug.Description = "The key held to put or retrieve a Slugcat from your back.";
+        PoleGrab.Description = "Key pressed to grab poles (default is to hold up).";
 
         Craft.Description = "The key held to make Artificer or Gourmand craft the items they are holding.";
 
@@ -44,8 +45,6 @@ public static class Input_Helpers
 
         Camo.Description = "Key pressed to trigger Watcher's camouflage ability.";
         Warp.Description = "Key pressed to trigger Watcher's warp ability.";
-
-        PoleGrab.Description = "Key pressed to grab poles.";
 
         BackSpear.HideConflict = k => k == BackSlug;
         BackSlug.HideConflict = k => k == BackSpear;

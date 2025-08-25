@@ -21,31 +21,50 @@ public static class Rebind_Hooks_PoleGrab
     private static void PlayerOnMovementUpdate_PoleGrab(ILContext il)
     {
         var c = new ILCursor(il);
-        var afterPoleGrabCheck = c.DefineLabel();
+
         var afterInputCheck = c.DefineLabel();
 
-	if (!c.TryGotoNext(MoveType.Before,
-		x => x.MatchStfld<Player>("wantToGrab")))
-	{
-            throw new Exception("Goto Failed");
-	}
-
-        // Get input skip destination AND check skip destination
-        if (!c.TryGotoNext(MoveType.Before,
-		x => x.MatchLdarg(0),
-		x => x.MatchCall<Player>("get_input"),
-		x => x.MatchLdcI4(0),
-		x => x.MatchLdelema<Player.InputPackage>(),
-		x => x.MatchLdfld<Player.InputPackage>(nameof(Player.InputPackage.y)),
-		x => x.MatchLdcI4(0),
-		x => x.MatchBle(out afterInputCheck)))
+        // Get input skip destination
+        if (!c.TryGotoNext(MoveType.After,
+                x => x.MatchLdarg(0),
+		    x => x.MatchLdarg(0),
+		    x => x.MatchCallOrCallvirt<Player>("get_input"),
+		    x => x.MatchLdcI4(0),
+		    x => x.MatchLdelema<Player.InputPackage>(),
+		    x => x.MatchLdfld<Player.InputPackage>(nameof(Player.InputPackage.y)),
+		    x => x.MatchLdcI4(0),
+		    x => x.MatchBle(out afterInputCheck)))
         {
             throw new Exception("Goto Failed");
         }
-        c.Emit(OpCodes.Br, afterPoleGrabCheck);
-        c.Index += 8;
-        c.MarkLabel(afterPoleGrabCheck);
-        c.EmitDelegate<Func<Player, bool>>(Input_Helpers.PoleGrabPressed);
-        c.Emit(OpCodes.Brfalse, afterInputCheck);
+
+        var origPath = c.MarkLabel();
+
+        if (!c.TryGotoPrev(MoveType.Before,
+                x => x.MatchLdarg(0),
+                x => x.MatchLdarg(0),
+                x => x.MatchCallOrCallvirt<Player>("get_input")))
+        {
+            throw new Exception("Goto Failed");
+        }
+
+        // Follow the original path if we're not using the custom bind
+        c.Emit(OpCodes.Ldarg_0);
+        c.EmitDelegate<Func<Player, bool>>(player => player.IsPoleGrabCustomInput());
+        c.Emit(OpCodes.Brfalse, origPath);
+
+
+        c.Emit(OpCodes.Ldarg_0);
+        c.Emit(OpCodes.Ldc_I4_1);
+        c.Emit<Player>(OpCodes.Stfld, nameof(Player.wantToGrab));
+
+        c.Emit(OpCodes.Ldarg_0);
+        c.EmitDelegate<Func<Player, bool>>(player => player.PoleGrabPressed());
+
+        c.Emit(OpCodes.Brtrue, afterInputCheck);
+
+        c.Emit(OpCodes.Ldarg_0);
+        c.Emit(OpCodes.Ldc_I4_0);
+        c.Emit<Player>(OpCodes.Stfld, nameof(Player.wantToGrab));
     }
 }
