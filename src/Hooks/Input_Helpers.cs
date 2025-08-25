@@ -216,6 +216,11 @@ public static class Input_Helpers
 
     public static bool PoleGrabPressed(this Player self)
     {
+        if ((ModManager.MSC && self.monkAscension) || self.Submersion > 0.9f)
+        {
+            return false;
+        }
+
         return IsPoleGrabCustomInput(self) ? self.IsPressed(PoleGrab) : self.input[0].y > 0;
     }
 
