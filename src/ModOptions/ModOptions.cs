@@ -18,6 +18,10 @@ public class ModOptions : OptionsTemplate
         "When checked, pressing either Arti Jump or Arti Parry will cause a jump input, mimicking the original binding's behavior.",
         null, "", "Arti Jump Input?"));
 
+    public static Configurable<bool> TapToBack { get; } = Instance.config.Bind("tapToBack", false, new ConfigurableInfo(
+        "When checked, moving a slug or spear to/from your back only requires a single press, rather than holding. Needs a custom bind to work.",
+        null, "", "Tap to Back?"));
+
     public static int NumberOfTabs => 1;
 
     public override void Initialize()
@@ -41,15 +45,18 @@ public class ModOptions : OptionsTemplate
 
         AddNewLine();
 
+        AddCheckBox(TapToBack);
+
         if (ModManager.MSC)
         {
             AddCheckBox(ArtiJumpInput);
-            DrawCheckBoxes(ref Tabs[tabIndex], offsetX: 150.0f);
+        }
 
-            if (GetConfigurable(ArtiJumpInput, out OpCheckBox checkBox))
-            {
-                checkBox.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
-            }
+        DrawCheckBoxes(ref Tabs[tabIndex], offsetX: ModManager.MSC ? 0.0f : 150.0f);
+
+        if (GetConfigurable(ArtiJumpInput, out OpCheckBox checkBox))
+        {
+            checkBox.colorEdge = PlayerGraphics.DefaultSlugcatColor(MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer);
         }
 
         AddNewLinesUntilEnd();

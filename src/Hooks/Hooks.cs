@@ -8,12 +8,16 @@ public static class Hooks
     {
         Rebind_Hooks_Back.ApplyHooks();
         Rebind_Hooks_GrappleWorm.ApplyHooks();
+        Rebind_Hooks_PoleGrab.ApplyHooks();
 
         Rebind_Hooks_Craft.ApplyHooks();
 
         Rebind_Hooks_Artificer.ApplyHooks();
         Rebind_Hooks_Saint.ApplyHooks();
         Rebind_Hooks_Spearmaster.ApplyHooks();
+
+        Rebind_Hooks_RivCell.ApplyHooks();
+        Rebind_Hooks_SlowTime.ApplyHooks();
 
         Rebind_Hooks_Watcher.ApplyHooks();
     }
