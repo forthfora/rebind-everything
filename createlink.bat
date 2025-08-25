@@ -1,8 +1,8 @@
 @echo off
 setlocal
 
-set "PATHVAR=%~dp0mod"
-set "MODNAME=raincord100k"
+set "PATHVAR=%~dp0assets"
+set "MODNAME=rebindeverything"
 set "MODSDIR=C:\Program Files (x86)\Steam\steamapps\common\Rain World\RainWorld_Data\StreamingAssets\mods"
 
 if not exist "%MODSDIR%" (
