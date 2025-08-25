@@ -23,6 +23,8 @@ public static class Input_Helpers
     public static PlayerKeybind Camo { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Camo", KeyCode.None, KeyCode.None);
     public static PlayerKeybind Warp { get; } = PlayerKeybind.Register("rebindeverything:warp", "Rebind Everything", "Warp", KeyCode.None, KeyCode.None);
 
+    public static PlayerKeybind PoleGrab { get; } = PlayerKeybind.Register("rebindeverything:polegrab", "Rebind Everything", "Pole Grab", KeyCode.None, KeyCode.None);
+
     public static void InitInput()
     {
         BackSpear.Description = "The key held to make Hunter either put or retrieve a spear from their back.";
@@ -43,6 +45,7 @@ public static class Input_Helpers
         Camo.Description = "Key pressed to trigger Watcher's camouflage ability.";
         Warp.Description = "Key pressed to trigger Watcher's warp ability.";
 
+        PoleGrab.Description = "Key pressed to grab poles.";
 
         BackSpear.HideConflict = k => k == BackSlug;
         BackSlug.HideConflict = k => k == BackSpear;
@@ -121,6 +124,11 @@ public static class Input_Helpers
     public static bool IsWarpCustomInput(this Player self)
     {
         return self.IsKeyBound(Warp) && !Warp.HideConfig && self.controller is null;
+    }
+
+    public static bool IsPoleGrabCustomInput(this Player self)
+    {
+        return self.IsKeyBound(PoleGrab) && !PoleGrab.HideConfig && self.controller is null;
     }
 
 
@@ -207,6 +215,10 @@ public static class Input_Helpers
         return IsWarpCustomInput(self) ? self.IsPressed(Warp) : self.input[0].spec;
     }
 
+    public static bool PoleGrabPressed(this Player self)
+    {
+        return IsPoleGrabCustomInput(self) ? self.IsPressed(PoleGrab) : self.input[0].y > 0;
+    }
 
     // Back Spear & Slug Helpers
     public static int PlayerGraspsHas(this Player self, AbstractPhysicalObject.AbstractObjectType type)

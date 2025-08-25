@@ -8,6 +8,7 @@ public static class Hooks
     {
         Rebind_Hooks_Back.ApplyHooks();
         Rebind_Hooks_GrappleWorm.ApplyHooks();
+        Rebind_Hooks_PoleGrab.ApplyHooks();
 
         Rebind_Hooks_Craft.ApplyHooks();
 
