@@ -19,7 +19,7 @@ public class ModOptions : OptionsTemplate
         null, "", "Arti Jump Input?"));
 
     public static Configurable<bool> TapToBack { get; } = Instance.config.Bind("tapToBack", false, new ConfigurableInfo(
-        "When checked, moving a slug or spear to/from your back only requires a single press, rather than a hold.",
+        "When checked, moving a slug or spear to/from your back only requires a single press, rather than holding. Needs a custom bind to work.",
         null, "", "Tap to Back?"));
 
     public static int NumberOfTabs => 1;

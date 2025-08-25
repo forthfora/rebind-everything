@@ -181,7 +181,7 @@ public static class Rebind_Hooks_Back
 
                     self.slugOnBack.increment = self.GetModule().IsBackSlugIncrementing;
 
-                    if (self.slugOnBack.counter == 0)
+                    if (self.slugOnBack.counter == 20)
                     {
                         self.GetModule().IsBackSlugIncrementing = false;
                     }
@@ -237,7 +237,7 @@ public static class Rebind_Hooks_Back
 
                     self.spearOnBack.increment = self.GetModule().IsBackSpearIncrementing;
 
-                    if (self.spearOnBack.counter == 0)
+                    if (self.spearOnBack.counter == 20)
                     {
                         self.GetModule().IsBackSpearIncrementing = false;
                     }

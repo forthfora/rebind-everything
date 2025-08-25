@@ -22,7 +22,7 @@ public static class Input_Helpers
 
     public static PlayerKeybind Grapple { get; } = PlayerKeybind.Register("rebindeverything:grapple", "Rebind Everything", "Grapple", KeyCode.None, KeyCode.None);
 
-    public static PlayerKeybind SlowTimePerk { get; } = PlayerKeybind.Register("rebindeverything:slowtimeperk", "Rebind Everything", "Slow Time Perk", KeyCode.None, KeyCode.None);
+    public static PlayerKeybind SlowTime { get; } = PlayerKeybind.Register("rebindeverything:slowtime", "Rebind Everything", "Slow Time", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Camo { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Camo", KeyCode.None, KeyCode.None);
     public static PlayerKeybind Warp { get; } = PlayerKeybind.Register("rebindeverything:warp", "Rebind Everything", "Warp", KeyCode.None, KeyCode.None);
@@ -46,7 +46,7 @@ public static class Input_Helpers
 
         Grapple.Description = "Affects Saint's Tongue & Grapple Worms.";
 
-        SlowTimePerk.Description = "Key pressed to trigger the Expedition slow time perk.";
+        SlowTime.Description = "Key pressed to trigger the Expedition slow time perk.";
         RivCell.Description = "Key pressed to trigger the Rarefaction Cell in Rivulet's campaign.";
 
         Camo.Description = "Key pressed to trigger Watcher's camouflage ability.";
@@ -71,7 +71,7 @@ public static class Input_Helpers
         Ascend.HideConfig = !ModManager.MSC;
         AimAscend.HideConfig = !ModManager.MSC;
 
-        SlowTimePerk.HideConfig = !ModManager.Expedition;
+        SlowTime.HideConfig = !ModManager.Expedition;
 
         Camo.HideConfig = !ModManager.Watcher;
         Warp.HideConfig = !ModManager.Watcher;
@@ -139,9 +139,9 @@ public static class Input_Helpers
         return self.IsKeyBound(PoleGrab) && !PoleGrab.HideConfig && self.controller is null;
     }
 
-    public static bool IsSlowTimePerkCustomInput(this Player self)
+    public static bool IsSlowTimeCustomInput(this Player self)
     {
-        return self.IsKeyBound(SlowTimePerk) && !SlowTimePerk.HideConfig && self.controller is null;
+        return self.IsKeyBound(SlowTime) && !SlowTime.HideConfig && self.controller is null;
     }
 
     public static bool IsRivCellCustomInput(this Player self)
@@ -243,14 +243,14 @@ public static class Input_Helpers
         return IsPoleGrabCustomInput(self) ? self.IsPressed(PoleGrab) : self.input[0].y > 0;
     }
 
-    public static bool SlowTimePerkPressed(this Player self)
+    public static bool SlowTimePressed(this Player self)
     {
-        return IsSlowTimePerkCustomInput(self) ? self.JustPressed(SlowTimePerk) : self.input[0].spec;
+        return IsSlowTimeCustomInput(self) ? self.IsPressed(SlowTime) : self.input[0].spec;
     }
 
     public static bool RivCellPressed(this Player self)
     {
-        return IsRivCellCustomInput(self) ? self.JustPressed(RivCell) : self.input[0].spec;
+        return IsRivCellCustomInput(self) ? self.IsPressed(RivCell) : self.input[0].spec;
     }
 
     // Back Spear & Slug Helpers

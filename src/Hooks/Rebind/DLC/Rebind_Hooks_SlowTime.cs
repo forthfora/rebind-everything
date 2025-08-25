@@ -2,7 +2,7 @@ using On.Expedition;
 
 namespace RebindEverything;
 
-public static class Rebind_Hooks_SlowTimePerk
+public static class Rebind_Hooks_SlowTime
 {
     public static void ApplyHooks()
     {
@@ -17,7 +17,7 @@ public static class Rebind_Hooks_SlowTimePerk
             return;
         }
 
-        if (!player.IsSlowTimePerkCustomInput())
+        if (!player.IsSlowTimeCustomInput())
         {
             orig(self);
             return;
@@ -26,8 +26,8 @@ public static class Rebind_Hooks_SlowTimePerk
         var input0 = player.input[0];
         var input1 = player.input[1];
 
-        player.input[0].mp = player.SlowTimePerkPressed();
-        player.input[1].pckp = player.SlowTimePerkPressed();
+        player.input[0].mp = player.SlowTimePressed();
+        player.input[1].pckp = player.SlowTimePressed();
 
         // Prevent alternative conditions from triggering
         player.input[0].pckp = false;
