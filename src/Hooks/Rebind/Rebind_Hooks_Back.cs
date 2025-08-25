@@ -1,4 +1,5 @@
-﻿using Mono.Cecil.Cil;
+﻿using ImprovedInput;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 
 namespace RebindEverything;
@@ -171,7 +172,24 @@ public static class Rebind_Hooks_Back
 
             if (hasFreeHand || self.CanRetrieveSlugFromBack || holdingSlug)
             {
-                self.slugOnBack.increment = self.BackSlugPressed();
+                if (ModOptions.TapToBack.Value)
+                {
+                    if (self.JustPressed(Input_Helpers.BackSlug))
+                    {
+                        self.GetModule().IsBackSlugIncrementing = !self.GetModule().IsBackSlugIncrementing;
+                    }
+
+                    self.slugOnBack.increment = self.GetModule().IsBackSlugIncrementing;
+
+                    if (self.slugOnBack.counter == 20)
+                    {
+                        self.GetModule().IsBackSlugIncrementing = false;
+                    }
+                }
+                else
+                {
+                    self.slugOnBack.increment = self.BackSlugPressed();
+                }
             }
         });
 
@@ -210,7 +228,28 @@ public static class Rebind_Hooks_Back
 
             if (hasFreeHand || self.CanRetrieveSpearFromBack || holdingSpear)
             {
-                self.spearOnBack.increment = self.BackSpearPressed();
+                if (ModOptions.TapToBack.Value)
+                {
+                    if (self.JustPressed(Input_Helpers.BackSpear))
+                    {
+                        self.GetModule().IsBackSpearIncrementing = !self.GetModule().IsBackSpearIncrementing;
+                    }
+
+                    self.spearOnBack.increment = self.GetModule().IsBackSpearIncrementing;
+
+                    if (self.spearOnBack.counter == 20)
+                    {
+                        self.GetModule().IsBackSpearIncrementing = false;
+                    }
+                }
+                else
+                {
+                    self.spearOnBack.increment = self.BackSpearPressed();
+                }
+            }
+            else
+            {
+                self.GetModule().IsBackSpearIncrementing = false;
             }
         });
 

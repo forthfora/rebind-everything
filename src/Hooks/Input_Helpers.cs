@@ -7,6 +7,7 @@ public static class Input_Helpers
 {
     public static PlayerKeybind BackSpear { get; } = PlayerKeybind.Register("rebindeverything:backspear", "Rebind Everything", "Back Spear", KeyCode.None, KeyCode.None);
     public static PlayerKeybind BackSlug { get; } = PlayerKeybind.Register("rebindeverything:backslug", "Rebind Everything", "Back Slug", KeyCode.None, KeyCode.None);
+    public static PlayerKeybind PoleGrab { get; } = PlayerKeybind.Register("rebindeverything:polegrab", "Rebind Everything", "Pole Grab", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Craft { get; } = PlayerKeybind.Register("rebindeverything:craft", "Rebind Everything", "Craft", KeyCode.None, KeyCode.None);
 
@@ -14,19 +15,24 @@ public static class Input_Helpers
     public static PlayerKeybind ArtiParry { get; } = PlayerKeybind.Register("rebindeverything:artiparry", "Rebind Everything", "Arti Parry", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind MakeSpear { get; } = PlayerKeybind.Register("rebindeverything:makespear", "Rebind Everything", "Make Spear", KeyCode.None, KeyCode.None);
+    public static PlayerKeybind RivCell { get; } = PlayerKeybind.Register("rebindeverything:rivcell", "Rebind Everything", "Riv Cell", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Ascend { get; } = PlayerKeybind.Register("rebindeverything:ascend", "Rebind Everything", "Ascend", KeyCode.None, KeyCode.None);
     public static PlayerKeybind AimAscend { get; } = PlayerKeybind.Register("rebindeverything:aimascend", "Rebind Everything", "Aim Ascend", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Grapple { get; } = PlayerKeybind.Register("rebindeverything:grapple", "Rebind Everything", "Grapple", KeyCode.None, KeyCode.None);
 
+    public static PlayerKeybind SlowTime { get; } = PlayerKeybind.Register("rebindeverything:slowtime", "Rebind Everything", "Slow Time", KeyCode.None, KeyCode.None);
+
     public static PlayerKeybind Camo { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Camo", KeyCode.None, KeyCode.None);
     public static PlayerKeybind Warp { get; } = PlayerKeybind.Register("rebindeverything:warp", "Rebind Everything", "Warp", KeyCode.None, KeyCode.None);
+
 
     public static void InitInput()
     {
         BackSpear.Description = "The key held to make Hunter either put or retrieve a spear from their back.";
         BackSlug.Description = "The key held to put or retrieve a Slugcat from your back.";
+        PoleGrab.Description = "Key pressed to grab poles (default is to hold up).";
 
         Craft.Description = "The key held to make Artificer or Gourmand craft the items they are holding.";
 
@@ -40,9 +46,11 @@ public static class Input_Helpers
 
         Grapple.Description = "Affects Saint's Tongue & Grapple Worms.";
 
+        SlowTime.Description = "Key pressed to trigger the Expedition slow time perk.";
+        RivCell.Description = "Key pressed to trigger the Rarefaction Cell in Rivulet's campaign.";
+
         Camo.Description = "Key pressed to trigger Watcher's camouflage ability.";
         Warp.Description = "Key pressed to trigger Watcher's warp ability.";
-
 
         BackSpear.HideConflict = k => k == BackSlug;
         BackSlug.HideConflict = k => k == BackSpear;
@@ -59,8 +67,11 @@ public static class Input_Helpers
         ArtiJump.HideConfig = !ModManager.MSC || MachineConnector.IsThisModActive("danizk0.rebindartificer");
         ArtiParry.HideConfig = !ModManager.MSC || MachineConnector.IsThisModActive("danizk0.rebindartificer");
         MakeSpear.HideConfig = !ModManager.MSC;
+        RivCell.HideConfig = !ModManager.MSC;
         Ascend.HideConfig = !ModManager.MSC;
         AimAscend.HideConfig = !ModManager.MSC;
+
+        SlowTime.HideConfig = !ModManager.Expedition;
 
         Camo.HideConfig = !ModManager.Watcher;
         Warp.HideConfig = !ModManager.Watcher;
@@ -121,6 +132,21 @@ public static class Input_Helpers
     public static bool IsWarpCustomInput(this Player self)
     {
         return self.IsKeyBound(Warp) && !Warp.HideConfig && self.controller is null;
+    }
+
+    public static bool IsPoleGrabCustomInput(this Player self)
+    {
+        return self.IsKeyBound(PoleGrab) && !PoleGrab.HideConfig && self.controller is null;
+    }
+
+    public static bool IsSlowTimeCustomInput(this Player self)
+    {
+        return self.IsKeyBound(SlowTime) && !SlowTime.HideConfig && self.controller is null;
+    }
+
+    public static bool IsRivCellCustomInput(this Player self)
+    {
+        return self.IsKeyBound(RivCell) && !RivCell.HideConfig && self.controller is null;
     }
 
 
@@ -207,6 +233,25 @@ public static class Input_Helpers
         return IsWarpCustomInput(self) ? self.IsPressed(Warp) : self.input[0].spec;
     }
 
+    public static bool PoleGrabPressed(this Player self)
+    {
+        if ((ModManager.MSC && self.monkAscension) || self.Submersion > 0.9f)
+        {
+            return false;
+        }
+
+        return IsPoleGrabCustomInput(self) ? self.IsPressed(PoleGrab) : self.input[0].y > 0;
+    }
+
+    public static bool SlowTimePressed(this Player self)
+    {
+        return IsSlowTimeCustomInput(self) ? self.IsPressed(SlowTime) : self.input[0].spec;
+    }
+
+    public static bool RivCellPressed(this Player self)
+    {
+        return IsRivCellCustomInput(self) ? self.IsPressed(RivCell) : self.input[0].spec;
+    }
 
     // Back Spear & Slug Helpers
     public static int PlayerGraspsHas(this Player self, AbstractPhysicalObject.AbstractObjectType type)
