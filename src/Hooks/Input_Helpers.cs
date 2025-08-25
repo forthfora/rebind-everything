@@ -15,11 +15,14 @@ public static class Input_Helpers
     public static PlayerKeybind ArtiParry { get; } = PlayerKeybind.Register("rebindeverything:artiparry", "Rebind Everything", "Arti Parry", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind MakeSpear { get; } = PlayerKeybind.Register("rebindeverything:makespear", "Rebind Everything", "Make Spear", KeyCode.None, KeyCode.None);
+    public static PlayerKeybind RivCell { get; } = PlayerKeybind.Register("rebindeverything:rivcell", "Rebind Everything", "Riv Cell", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Ascend { get; } = PlayerKeybind.Register("rebindeverything:ascend", "Rebind Everything", "Ascend", KeyCode.None, KeyCode.None);
     public static PlayerKeybind AimAscend { get; } = PlayerKeybind.Register("rebindeverything:aimascend", "Rebind Everything", "Aim Ascend", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Grapple { get; } = PlayerKeybind.Register("rebindeverything:grapple", "Rebind Everything", "Grapple", KeyCode.None, KeyCode.None);
+
+    public static PlayerKeybind SlowTimePerk { get; } = PlayerKeybind.Register("rebindeverything:slowtimeperk", "Rebind Everything", "Slow Time Perk", KeyCode.None, KeyCode.None);
 
     public static PlayerKeybind Camo { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Camo", KeyCode.None, KeyCode.None);
     public static PlayerKeybind Warp { get; } = PlayerKeybind.Register("rebindeverything:warp", "Rebind Everything", "Warp", KeyCode.None, KeyCode.None);
@@ -43,6 +46,9 @@ public static class Input_Helpers
 
         Grapple.Description = "Affects Saint's Tongue & Grapple Worms.";
 
+        SlowTimePerk.Description = "Key pressed to trigger the Expedition slow time perk.";
+        RivCell.Description = "Key pressed to trigger the Rarefaction Cell in Rivulet's campaign.";
+
         Camo.Description = "Key pressed to trigger Watcher's camouflage ability.";
         Warp.Description = "Key pressed to trigger Watcher's warp ability.";
 
@@ -61,8 +67,11 @@ public static class Input_Helpers
         ArtiJump.HideConfig = !ModManager.MSC || MachineConnector.IsThisModActive("danizk0.rebindartificer");
         ArtiParry.HideConfig = !ModManager.MSC || MachineConnector.IsThisModActive("danizk0.rebindartificer");
         MakeSpear.HideConfig = !ModManager.MSC;
+        RivCell.HideConfig = !ModManager.MSC;
         Ascend.HideConfig = !ModManager.MSC;
         AimAscend.HideConfig = !ModManager.MSC;
+
+        SlowTimePerk.HideConfig = !ModManager.Expedition;
 
         Camo.HideConfig = !ModManager.Watcher;
         Warp.HideConfig = !ModManager.Watcher;
@@ -128,6 +137,16 @@ public static class Input_Helpers
     public static bool IsPoleGrabCustomInput(this Player self)
     {
         return self.IsKeyBound(PoleGrab) && !PoleGrab.HideConfig && self.controller is null;
+    }
+
+    public static bool IsSlowTimePerkCustomInput(this Player self)
+    {
+        return self.IsKeyBound(SlowTimePerk) && !SlowTimePerk.HideConfig && self.controller is null;
+    }
+
+    public static bool IsRivCellCustomInput(this Player self)
+    {
+        return self.IsKeyBound(RivCell) && !RivCell.HideConfig && self.controller is null;
     }
 
 
@@ -222,6 +241,16 @@ public static class Input_Helpers
         }
 
         return IsPoleGrabCustomInput(self) ? self.IsPressed(PoleGrab) : self.input[0].y > 0;
+    }
+
+    public static bool SlowTimePerkPressed(this Player self)
+    {
+        return IsSlowTimePerkCustomInput(self) ? self.JustPressed(SlowTimePerk) : self.input[0].spec;
+    }
+
+    public static bool RivCellPressed(this Player self)
+    {
+        return IsRivCellCustomInput(self) ? self.JustPressed(RivCell) : self.input[0].spec;
     }
 
     // Back Spear & Slug Helpers

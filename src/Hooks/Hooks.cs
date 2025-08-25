@@ -16,6 +16,9 @@ public static class Hooks
         Rebind_Hooks_Saint.ApplyHooks();
         Rebind_Hooks_Spearmaster.ApplyHooks();
 
+        Rebind_Hooks_RivCell.ApplyHooks();
+        Rebind_Hooks_SlowTimePerk.ApplyHooks();
+
         Rebind_Hooks_Watcher.ApplyHooks();
     }
 
