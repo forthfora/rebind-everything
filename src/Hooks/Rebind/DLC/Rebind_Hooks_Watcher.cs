@@ -31,6 +31,18 @@ public static class Rebind_Hooks_Watcher
         {
             e.LogHookException();
         }
+        
+        try
+        {
+            _ = new Hook(
+                typeof(Player).GetProperty(nameof(Player.watcherNonDynamicWarpInput), BindingFlags.Instance | BindingFlags.Public)?.GetGetMethod(),
+                typeof(Rebind_Hooks_Watcher).GetMethod(nameof(WatcherNonDynamicWarpInput), BindingFlags.Static | BindingFlags.NonPublic)
+            );
+        }
+        catch (Exception e)
+        {
+            e.LogHookException();
+        }
 
         On.Player.WatcherUpdate += PlayerOnWatcherUpdate;
     }
@@ -39,32 +51,29 @@ public static class Rebind_Hooks_Watcher
     {
         orig(self);
 
-        if (!self.IsCamoCustomInput())
-        {
-            return;
-        }
-
         if (!ModManager.Watcher || self.SlugCatClass != WatcherEnums.SlugcatStatsName.Watcher)
         {
             return;
         }
 
-        if (!self.CamoPressed())
+        if (!self.IsRippleCustomInput())
         {
-            self.camoInputsNeedReset = true;
+            return;
         }
+
+        self.camoInputsNeedReset = !self.RipplePressed();
     }
 
     private static bool RippleAbilityActivationButtonCondition(Func<Player, bool> orig, Player self)
     {
-        if (!self.IsCamoCustomInput())
+        if (!self.IsRippleCustomInput())
         {
             return orig(self);
         }
 
         var temp = self.input[0].spec;
 
-        self.input[0].spec = self.CamoPressed();
+        self.input[0].spec = self.RipplePressed();
 
         var result = orig(self);
 
@@ -85,6 +94,27 @@ public static class Rebind_Hooks_Watcher
 
         self.input[0].spec = self.WarpPressed();
         self.input[0].y = self.WarpPressed() ? 1 : 0;
+
+        var result = orig(self);
+
+        self.input[0].spec = tempSpec;
+        self.input[0].y = tempY;
+
+        return result;
+    }
+    
+    private static bool WatcherNonDynamicWarpInput(Func<Player, bool> orig, Player self)
+    {
+        if (!self.IsDialWarpCustomInput())
+        {
+            return orig(self);
+        }
+
+        var tempSpec = self.input[0].spec;
+        var tempY = self.input[0].y;
+
+        self.input[0].spec = self.DialWarpPressed();
+        self.input[0].y = self.DialWarpPressed() ? -1 : 0;
 
         var result = orig(self);
 

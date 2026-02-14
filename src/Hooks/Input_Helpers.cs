@@ -24,10 +24,10 @@ public static class Input_Helpers
 
     public static PlayerKeybind SlowTime { get; } = PlayerKeybind.Register("rebindeverything:slowtime", "Rebind Everything", "Slow Time", KeyCode.None, KeyCode.None);
 
-    public static PlayerKeybind Camo { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Camo", KeyCode.None, KeyCode.None);
+    public static PlayerKeybind Ripple { get; } = PlayerKeybind.Register("rebindeverything:camo", "Rebind Everything", "Ripple", KeyCode.None, KeyCode.None);
     public static PlayerKeybind Warp { get; } = PlayerKeybind.Register("rebindeverything:warp", "Rebind Everything", "Warp", KeyCode.None, KeyCode.None);
-
-
+    public static PlayerKeybind DialWarp { get; } = PlayerKeybind.Register("rebindeverything:dialwarp", "Rebind Everything", "Dial Warp", KeyCode.None, KeyCode.None);
+    
     public static void InitInput()
     {
         BackSpear.Description = "The key held to make Hunter either put or retrieve a spear from their back.";
@@ -49,8 +49,9 @@ public static class Input_Helpers
         SlowTime.Description = "Key pressed to trigger the Expedition slow time perk.";
         RivCell.Description = "Key pressed to trigger the Rarefaction Cell in Rivulet's campaign.";
 
-        Camo.Description = "Key pressed to trigger Watcher's camouflage ability.";
+        Ripple.Description = "Key pressed to trigger Watcher's ripple ability.";
         Warp.Description = "Key pressed to trigger Watcher's warp ability.";
+        DialWarp.Description = "Key pressed to trigger Watcher's dial warp ability.";
 
         BackSpear.HideConflict = k => k == BackSlug;
         BackSlug.HideConflict = k => k == BackSpear;
@@ -73,8 +74,9 @@ public static class Input_Helpers
 
         SlowTime.HideConfig = !ModManager.Expedition;
 
-        Camo.HideConfig = !ModManager.Watcher;
+        Ripple.HideConfig = !ModManager.Watcher;
         Warp.HideConfig = !ModManager.Watcher;
+        DialWarp.HideConfig = !ModManager.Watcher;
     }
 
 
@@ -124,14 +126,19 @@ public static class Input_Helpers
         return self.IsKeyBound(Grapple) && !Grapple.HideConfig && self.controller is null;
     }
 
-    public static bool IsCamoCustomInput(this Player self)
+    public static bool IsRippleCustomInput(this Player self)
     {
-        return self.IsKeyBound(Camo) && !Camo.HideConfig && self.controller is null;
+        return self.IsKeyBound(Ripple) && !Ripple.HideConfig && self.controller is null;
     }
 
     public static bool IsWarpCustomInput(this Player self)
     {
         return self.IsKeyBound(Warp) && !Warp.HideConfig && self.controller is null;
+    }
+    
+    public static bool IsDialWarpCustomInput(this Player self)
+    {
+        return self.IsKeyBound(DialWarp) && !DialWarp.HideConfig && self.controller is null;
     }
 
     public static bool IsPoleGrabCustomInput(this Player self)
@@ -153,8 +160,8 @@ public static class Input_Helpers
     // Whether the custom input is pressed
     public static bool ArtiJumpPressed(this Player self)
     {
-        var isCustomInput = IsArtiJumpCustomInput(self);
-        var isParryOverride = ArtiJump.CurrentBinding(self.playerState.playerNumber) == ArtiParry.CurrentBinding(self.playerState.playerNumber) && self.input[0].y < 0 && self.bodyMode != Player.BodyModeIndex.ZeroG;
+        var isCustomInput = self.IsArtiJumpCustomInput();
+        var isParryOverride = ArtiJump.CurrentBindingName(self.playerState.playerNumber) == ArtiParry.CurrentBindingName(self.playerState.playerNumber) && self.input[0].y < 0 && self.bodyMode != Player.BodyModeIndex.ZeroG;
 
         var eatFlag = self.eatMeat >= 20 || self.maulTimer >= 15;
 
@@ -170,7 +177,7 @@ public static class Input_Helpers
 
     public static bool ArtiParryPressed(this Player self)
     {
-        var isCustomInput = IsArtiParryCustomInput(self);
+        var isCustomInput = self.IsArtiParryCustomInput();
 
         var flag = self.wantToJump > 0 && self.input[0].pckp;
         var flag2 = self.eatMeat >= 20 || self.maulTimer >= 15;
@@ -190,7 +197,7 @@ public static class Input_Helpers
             return false;
         }
 
-        return IsBackSpearCustomInput(self) ? self.IsPressed(BackSpear) : self.input[0].pckp;
+        return self.IsBackSpearCustomInput() ? self.IsPressed(BackSpear) : self.input[0].pckp;
     }
 
     public static bool BackSlugPressed(this Player self)
@@ -200,37 +207,42 @@ public static class Input_Helpers
             return false;
         }
 
-        return IsBackSlugCustomInput(self) ? self.IsPressed(BackSlug) : self.input[0].pckp;
+        return self.IsBackSlugCustomInput() ? self.IsPressed(BackSlug) : self.input[0].pckp;
     }
 
     public static bool CraftPressed(this Player self)
     {
-        return IsCraftCustomInput(self) ? self.IsPressed(Craft) : self.input[0].pckp;
+        return self.IsCraftCustomInput() ? self.IsPressed(Craft) : self.input[0].pckp;
     }
 
     public static bool AimAscendPressed(this Player self)
     {
-        return IsAimAscendCustomInput(self) ? self.IsPressed(AimAscend) : self.input[0].thrw;
+        return self.IsAimAscendCustomInput() ? self.IsPressed(AimAscend) : self.input[0].thrw;
     }
 
     public static bool GrapplePressed(this Player self)
     {
-        return IsGrappleCustomInput(self) ? self.IsPressed(Grapple) : self.input[0].jmp;
+        return self.IsGrappleCustomInput() ? self.IsPressed(Grapple) : self.input[0].jmp;
     }
 
     public static bool MakeSpearPressed(this Player self)
     {
-        return IsMakeSpearCustomInput(self) ? self.IsPressed(MakeSpear) : self.input[0].pckp;
+        return self.IsMakeSpearCustomInput() ? self.IsPressed(MakeSpear) : self.input[0].pckp;
     }
 
-    public static bool CamoPressed(this Player self)
+    public static bool RipplePressed(this Player self)
     {
-        return IsCamoCustomInput(self) ? self.IsPressed(Camo) : self.input[0].spec;
+        return self.IsRippleCustomInput() ? self.IsPressed(Ripple) : self.input[0].spec && self.input[0].y == 0;
     }
 
     public static bool WarpPressed(this Player self)
     {
-        return IsWarpCustomInput(self) ? self.IsPressed(Warp) : self.input[0].spec;
+        return self.IsWarpCustomInput() ? self.IsPressed(Warp) : self.input[0].spec && self.input[0].y > 0;
+    }
+    
+    public static bool DialWarpPressed(this Player self)
+    {
+        return self.IsDialWarpCustomInput() ? self.IsPressed(DialWarp) : self.input[0].spec && self.input[0].y < 0;
     }
 
     public static bool PoleGrabPressed(this Player self)
@@ -240,17 +252,17 @@ public static class Input_Helpers
             return false;
         }
 
-        return IsPoleGrabCustomInput(self) ? self.IsPressed(PoleGrab) : self.input[0].y > 0;
+        return self.IsPoleGrabCustomInput() ? self.IsPressed(PoleGrab) : self.input[0].y > 0;
     }
 
     public static bool SlowTimePressed(this Player self)
     {
-        return IsSlowTimeCustomInput(self) ? self.IsPressed(SlowTime) : self.input[0].spec;
+        return self.IsSlowTimeCustomInput() ? self.IsPressed(SlowTime) : self.input[0].spec;
     }
 
     public static bool RivCellPressed(this Player self)
     {
-        return IsRivCellCustomInput(self) ? self.IsPressed(RivCell) : self.input[0].spec;
+        return self.IsRivCellCustomInput() ? self.IsPressed(RivCell) : self.input[0].spec;
     }
 
     // Back Spear & Slug Helpers
